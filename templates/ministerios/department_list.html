@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Ministérios · Gestão da Igreja{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow">EQUIPES E SERVIÇO</div><h1>Departamentos e Ministérios</h1><p class="muted">Organize responsáveis e pessoas que servem em cada área.</p></div>
+  {% if perms.ministerios.add_department %}<a class="button button-primary" href="{% url 'department-create' %}">+ Novo departamento</a>{% endif %}
+</div>
+<section class="panel">
+  <form method="get" class="filters">
+    <div class="search-field"><label class="sr-only" for="department-search">Buscar departamento</label><input id="department-search" type="search" name="q" value="{{ search_query }}" placeholder="Nome, líder, vice-líder ou participante"></div>
+    <label class="sr-only" for="department-active">Filtrar situação</label>
+    <select id="department-active" name="active"><option value="">Todos</option><option value="true" {% if selected_active == "true" %}selected{% endif %}>Ativos</option><option value="false" {% if selected_active == "false" %}selected{% endif %}>Inativos</option></select>
+    <button class="button button-secondary" type="submit">Buscar</button>
+    {% if search_query or selected_active %}<a class="text-link clear-filter" href="{% url 'department-list' %}">Limpar</a>{% endif %}
+  </form>
+  {% if departments %}
+  <div class="table-wrap"><table><thead><tr><th>Departamento</th><th>Liderança</th><th>Membros</th><th>Situação</th><th></th></tr></thead><tbody>
+    {% for department in departments %}<tr>
+      <td><a class="person-link" href="{% url 'department-detail' department.pk %}">{{ department.name }}</a>{% if department.description %}<span class="subline department-description">{{ department.description }}</span>{% endif %}</td>
+      <td>{% if department.leader %}{{ department.leader }}{% else %}—{% endif %}{% if department.vice_leader %}<span class="subline">Vice-líder: {{ department.vice_leader }}</span>{% endif %}</td>
+      <td>{{ department.member_count }}</td>
+      <td><span class="status-pill {% if not department.active %}status-draft{% endif %}">{% if department.active %}Ativo{% else %}Inativo{% endif %}</span></td>
+      <td><a class="text-link" href="{% url 'department-detail' department.pk %}">Abrir</a></td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% if is_paginated %}<nav class="pagination" aria-label="Paginação">{% if page_obj.has_previous %}<a href="?q={{ search_query|urlencode }}&active={{ selected_active|urlencode }}&page={{ page_obj.previous_page_number }}">← Anterior</a>{% endif %}<span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a href="?q={{ search_query|urlencode }}&active={{ selected_active|urlencode }}&page={{ page_obj.next_page_number }}">Próxima →</a>{% endif %}</nav>{% endif %}
+  {% else %}<div class="empty-state"><div class="empty-icon">♧</div><h3>Nenhum departamento encontrado</h3><p>Cadastre um ministério e organize sua equipe.</p>{% if perms.ministerios.add_department %}<a class="button button-primary" href="{% url 'department-create' %}">Cadastrar departamento</a>{% endif %}</div>{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Relatórios financeiros · Financeiro{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'financial-dashboard' %}">FINANCEIRO</a> / RELATÓRIOS</div><h1>Relatórios financeiros</h1><p class="muted">Valores recebidos e pagos no período, agrupados por categoria, ministério e evento.</p></div>
+</div>
+<section class="panel">
+  <form method="get" class="filters">
+    <div><label for="{{ filter_form.date_from.id_for_label }}">Data inicial</label>{{ filter_form.date_from }}{% for error in filter_form.date_from.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>
+    <div><label for="{{ filter_form.date_to.id_for_label }}">Data final</label>{{ filter_form.date_to }}{% for error in filter_form.date_to.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>
+    <button class="button button-secondary" type="submit">Aplicar período</button>
+    <a class="text-link clear-filter" href="{% url 'financial-report' %}">Este mês</a>
+  </form>
+  {% if filter_form.non_field_errors %}<div class="message error">{{ filter_form.non_field_errors }}</div>{% endif %}
+  <p class="muted">Período aplicado: {{ date_from|date:"d/m/Y" }} a {{ date_to|date:"d/m/Y" }}. Somente lançamentos liquidados entram nos totais.</p>
+</section>
+<section class="stats-grid" aria-label="Totais do período">
+  <article class="stat-card"><span class="stat-label">Receitas recebidas</span><strong>R$ {{ income_total|floatformat:2 }}</strong></article>
+  <article class="stat-card"><span class="stat-label">Despesas pagas</span><strong>R$ {{ expense_total|floatformat:2 }}</strong></article>
+  <article class="stat-card"><span class="stat-label">Saldo do período</span><strong>R$ {{ net_total|floatformat:2 }}</strong></article>
+</section>
+<section class="panel upcoming-panel">
+  <div class="panel-heading"><div><h2>Por categoria</h2><p class="muted">Consolidação dos lançamentos recebidos e pagos.</p></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Tipo</th><th>Categoria</th><th>Lançamentos</th><th>Total</th></tr></thead><tbody>
+    {% for row in category_rows %}<tr><td>{% if row.kind == "income" %}Receita{% else %}Despesa{% endif %}</td><td>{{ row.category__name }}</td><td>{{ row.count }}</td><td>R$ {{ row.total|floatformat:2 }}</td></tr>
+    {% empty %}<tr><td colspan="4">Não há lançamentos liquidados neste período.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+<section class="panel upcoming-panel">
+  <div class="panel-heading"><div><h2>Por forma de recebimento/pagamento</h2><p class="muted">Somente lançamentos conferidos e liquidados no período.</p></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Forma</th><th>Lançamentos</th><th>Total</th></tr></thead><tbody>
+    {% for row in payment_method_rows %}<tr><td>{{ row.method_label }}</td><td>{{ row.count }}</td><td>R$ {{ row.total|floatformat:2 }}</td></tr>
+    {% empty %}<tr><td colspan="3">Não há lançamentos liquidados neste período.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+<section class="panel upcoming-panel">
+  <div class="panel-heading"><div><h2>Por ministério</h2><p class="muted">Receitas e despesas associadas a cada departamento.</p></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Ministério</th><th>Receitas</th><th>Despesas</th><th>Saldo</th></tr></thead><tbody>
+    {% for row in department_rows %}<tr><td>{{ row.department__name|default:"Sem departamento" }}</td><td>R$ {{ row.income|floatformat:2 }}</td><td>R$ {{ row.expense|floatformat:2 }}</td><td>R$ {{ row.net|floatformat:2 }}</td></tr>
+    {% empty %}<tr><td colspan="4">Não há lançamentos liquidados neste período.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+<section class="panel upcoming-panel">
+  <div class="panel-heading"><div><h2>Por evento</h2><p class="muted">Receitas e despesas associadas a eventos.</p></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Evento</th><th>Receitas</th><th>Despesas</th></tr></thead><tbody>
+    {% for row in event_rows %}<tr><td>{{ row.event__title|default:"Sem evento" }}</td><td>R$ {{ row.income|floatformat:2 }}</td><td>R$ {{ row.expense|floatformat:2 }}</td></tr>
+    {% empty %}<tr><td colspan="3">Não há lançamentos liquidados neste período.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+<section class="panel upcoming-panel">
+  <div class="panel-heading"><div><h2>Pendências no período</h2><p class="muted">Em aberto, não incluídas nos totais de caixa.</p></div></div>
+  {% if pending_transactions %}
+  <div class="table-wrap"><table><thead><tr><th>Descrição</th><th>Tipo</th><th>Categoria</th><th>Vencimento</th><th>Valor</th></tr></thead><tbody>
+    {% for entry in pending_transactions %}<tr><td><a class="person-link" href="{% url 'financial-transaction-detail' entry.pk %}">{{ entry.title }}</a></td><td>{{ entry.get_kind_display }}</td><td>{{ entry.category }}</td><td>{{ entry.due_on|date:"d/m/Y" }}</td><td>R$ {{ entry.amount|floatformat:2 }}</td></tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty-compact">Nenhuma pendência no período.</div>{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Escala · {{ activity.title }}{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'department-activity-detail' department.pk activity.pk %}">{{ department.name|upper }}</a> / ESCALA</div><h1>Escala de funções</h1><p class="muted">{{ activity.title }} · {{ activity.starts_at|date:"d/m/Y · H:i" }}</p></div>
+</div>
+<section class="panel">
+  <div class="panel-heading"><div><h2>Adicionar pessoa</h2><p class="muted">Escolha uma pessoa deste ministério e a função que exercerá nesta atividade.</p></div></div>
+  <form method="post" class="form-panel">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-grid">
+      {% for field in form %}
+      <div class="field {% if field.name == 'custom_role' %}field-wide{% endif %}">
+        <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required">*</span>{% endif %}</label>
+        {{ field }}
+        {% if field.help_text %}<span class="help-text">{{ field.help_text }}</span>{% endif %}
+        {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="form-actions"><a class="button button-secondary" href="{% url 'department-activity-detail' department.pk activity.pk %}">Voltar à atividade</a><button class="button button-primary" type="submit">Adicionar à escala</button></div>
+  </form>
+</section>
+<section class="panel upcoming-panel">
+  <div class="panel-heading"><div><h2>Pessoas escaladas</h2><p class="muted">{{ assignments|length }} função(ões) registrada(s).</p></div></div>
+  {% if assignments %}
+  <div class="table-wrap"><table><thead><tr><th>Função</th><th>Nome</th><th></th></tr></thead><tbody>
+    {% for assignment in assignments %}<tr>
+      <td>{{ assignment.role_label }}</td><td>{{ assignment.member }}</td>
+      <td><form method="post" action="{% url 'department-activity-assignment-delete' department.pk activity.pk assignment.pk %}">{% csrf_token %}<button class="button button-secondary" type="submit">Remover</button></form></td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty-compact">Ainda não há pessoas escaladas para esta atividade.</div>{% endif %}
+</section>
+{% endblock %}

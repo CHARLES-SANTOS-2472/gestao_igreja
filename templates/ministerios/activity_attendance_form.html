@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Registrar presença · {{ activity.title }}{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'department-detail' department.pk %}">{{ department.name|upper }}</a> / PRESENÇA</div><h1>Registrar presença</h1><p class="muted">{{ activity.title }} · {{ activity.starts_at|date:"d/m/Y · H:i" }}</p></div>
+</div>
+<form method="post" class="panel form-panel">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
+  {% if form.members %}
+  <p class="muted attendance-intro">Marque cada participante como presente, ausente ou deixe como não registrado. A lista inclui participantes atuais e registros de presença anteriores.</p>
+  <div class="attendance-list">
+    {% for field in form %}
+    <div class="attendance-row">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+  <div class="form-actions"><a class="button button-secondary" href="{% url 'department-activity-detail' department.pk activity.pk %}">Cancelar</a><button class="button button-primary" type="submit">Salvar presenças</button></div>
+  {% else %}
+  <div class="empty-state"><div class="empty-icon">✓</div><h3>Nenhum participante cadastrado</h3><p>Edite a atividade e selecione os participantes antes de registrar presença.</p><a class="button button-secondary" href="{% url 'department-activity-detail' department.pk activity.pk %}">Voltar à atividade</a></div>
+  {% endif %}
+</form>
+{% endblock %}

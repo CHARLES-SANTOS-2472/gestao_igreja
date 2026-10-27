@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Histórico de ajudas · Assistência social{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'assisted-family-list' %}">ASSISTÊNCIA SOCIAL</a> / RELATÓRIO</div><h1>Histórico de ajudas</h1><p class="muted">Consulte o controle operacional de ajudas programadas, entregues e canceladas.</p></div>
+  <a class="button button-secondary" href="{% url 'assisted-family-list' %}">Famílias atendidas</a>
+</div>
+<section class="stats-grid">
+  <article class="stat-card"><span class="stat-label">Registros no relatório</span><strong>{{ report_summary.total_count }}</strong><span class="stat-note">Conforme os filtros aplicados</span></article>
+  <article class="stat-card"><span class="stat-label">Ajudas entregues</span><strong>{{ report_summary.delivered_count }}</strong><span class="stat-note">Dentro do período e filtros selecionados</span></article>
+  <article class="stat-card"><span class="stat-label">Programadas</span><strong>{{ report_summary.planned_count }}</strong><span class="stat-note">Dentro do período e filtros selecionados</span></article>
+  <article class="stat-card"><span class="stat-label">Canceladas</span><strong>{{ report_summary.cancelled_count }}</strong><span class="stat-note">Dentro do período e filtros selecionados</span></article>
+  <article class="stat-card"><span class="stat-label">Ajuda financeira entregue</span><strong>R$ {{ report_summary.delivered_financial_total|floatformat:2 }}</strong><span class="stat-note">Somente registros financeiros entregues</span></article>
+</section>
+<section class="panel upcoming-panel">
+  <form method="get" class="filters">
+    <div><label for="{{ filter_form.status.id_for_label }}">Situação</label>{{ filter_form.status }}</div>
+    <div><label for="{{ filter_form.aid_type.id_for_label }}">Tipo de ajuda</label>{{ filter_form.aid_type }}</div>
+    <div><label for="{{ filter_form.date_from.id_for_label }}">De</label>{{ filter_form.date_from }}</div>
+    <div><label for="{{ filter_form.date_to.id_for_label }}">Até</label>{{ filter_form.date_to }}</div>
+    <button class="button button-secondary" type="submit">Filtrar</button>
+    {% if request.GET %}<a class="text-link clear-filter" href="{% url 'assistance-list' %}">Limpar</a>{% endif %}
+  </form>
+  {% if filter_form.errors %}<div class="message error">{{ filter_form.errors }}</div>{% endif %}
+  <div class="form-actions">
+    <a class="button button-secondary" href="{% url 'assistance-export-pdf' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}">Baixar relatório em PDF</a>
+  </div>
+  {% if aid_type_rows %}
+  <div class="panel-heading"><div><h2>Resumo por tipo de ajuda</h2><p class="muted">Os totais abaixo seguem os mesmos filtros do histórico.</p></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Tipo de ajuda</th><th>Registros</th><th>Entregues</th><th>Quantidade entregue</th><th>Valor financeiro entregue</th></tr></thead><tbody>
+    {% for row in aid_type_rows %}<tr>
+      <td>{{ row.aid_type_label }}</td><td>{{ row.record_count }}</td><td>{{ row.delivered_count }}</td>
+      <td>{% if row.aid_type == "financial" %}—{% else %}{{ row.delivered_quantity|default:0 }}{% endif %}</td>
+      <td>{% if row.aid_type == "financial" %}R$ {{ row.delivered_amount|floatformat:2 }}{% else %}—{% endif %}</td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% endif %}
+  <div class="panel-heading"><div><h2>Registros detalhados</h2><p class="muted">A lista detalhada abaixo segue os mesmos filtros.</p></div></div>
+  {% if assistance_records %}<div class="table-wrap"><table><thead><tr><th>Família</th><th>Ajuda</th><th>Descrição</th><th>Quantidade / valor</th><th>Data</th><th>Situação</th></tr></thead><tbody>
+    {% for record in assistance_records %}<tr>
+      <td><a class="person-link" href="{% url 'assisted-family-detail' record.family_id %}">{{ record.family.reference_name }}</a></td><td>{{ record.get_aid_type_display }}</td><td>{{ record.description|default:"—" }}</td><td>{% if record.amount != None %}R$ {{ record.amount|floatformat:2 }}{% else %}{{ record.quantity }}{% endif %}</td><td>{{ record.assistance_date|date:"d/m/Y" }}</td><td>{{ record.get_status_display }}</td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% if is_paginated %}<nav class="pagination" aria-label="Paginação">{% if page_obj.has_previous %}<a href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}">← Anterior</a>{% endif %}<span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}">Próxima →</a>{% endif %}</nav>{% endif %}
+  {% else %}<div class="empty-state"><h3>Nenhuma ajuda encontrada</h3><p>Registre ajudas pela ficha da família atendida.</p></div>{% endif %}
+</section>
+{% endblock %}

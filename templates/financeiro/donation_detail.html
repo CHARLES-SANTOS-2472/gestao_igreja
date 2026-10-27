@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Doação recebida · Financeiro{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'donation-list' %}">DOAÇÕES RECEBIDAS</a> / REGISTRO</div><h1>{% if donation.anonymous %}Doação anônima{% else %}{{ donation.donor_name|default:"Doador não informado" }}{% endif %}</h1><p class="muted">{{ donation.get_donation_type_display }} · {{ donation.get_status_display }}</p></div>
+  <a class="button button-secondary" href="{% url 'donation-list' %}">Voltar à lista</a>
+</div>
+<section class="panel">
+  <div class="panel-heading"><div><h2>Detalhes da doação</h2><p class="muted">Um registro por destinação para permitir conferência e prestação de contas.</p></div></div>
+  <dl class="detail-grid">
+    <div><dt>Data do recebimento</dt><dd>{{ donation.received_on|date:"d/m/Y" }}</dd></div>
+    <div><dt>Tipo</dt><dd>{{ donation.get_donation_type_display }}</dd></div>
+    <div><dt>Valor</dt><dd>{% if donation.amount != None %}R$ {{ donation.amount|floatformat:2 }}{% else %}—{% endif %}</dd></div>
+    <div><dt>Quantidade</dt><dd>{% if donation.quantity != None %}{{ donation.quantity|floatformat:"-2" }} {{ donation.unit }}{% else %}—{% endif %}</dd></div>
+    <div class="detail-wide"><dt>Descrição</dt><dd>{{ donation.description|default:"Doação em dinheiro" }}</dd></div>
+    <div><dt>Destinação</dt><dd>{{ donation.get_destination_display }}</dd></div>
+    <div><dt>Departamento / ministério</dt><dd>{{ donation.department|default:"—" }}</dd></div>
+    <div><dt>Evento</dt><dd>{{ donation.event|default:"—" }}</dd></div>
+    <div class="detail-wide"><dt>Finalidade</dt><dd>{{ donation.destination_description|default:"—" }}</dd></div>
+    <div><dt>Registrada por</dt><dd>{{ donation.recorded_by|default:"—" }}</dd></div>
+    {% if donation.financial_transaction_id %}<div><dt>Receita financeira</dt><dd>{% if perms.financeiro.view_financialtransaction %}<a class="text-link" href="{% url 'financial-transaction-detail' donation.financial_transaction_id %}">Ver lançamento vinculado</a>{% else %}Registrada no financeiro{% endif %}</dd></div>{% endif %}
+    {% if donation.status == "cancelled" %}<div class="detail-wide"><dt>Motivo do cancelamento</dt><dd>{{ donation.cancellation_reason }}</dd></div><div><dt>Cancelada por</dt><dd>{{ donation.cancelled_by|default:"—" }}</dd></div>{% endif %}
+  </dl>
+</section>
+{% if can_cancel %}<section class="panel upcoming-panel">
+  <div class="panel-heading"><div><h2>Cancelar registro</h2><p class="muted">A receita financeira vinculada também será cancelada e deixará de compor os totais realizados.</p></div></div>
+  <form method="post" action="{% url 'donation-cancel' donation.pk %}">
+    {% csrf_token %}
+    <label for="{{ cancellation_form.reason.id_for_label }}">{{ cancellation_form.reason.label }}</label>
+    {{ cancellation_form.reason }}
+    {% for error in cancellation_form.reason.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    <div class="form-actions"><button class="button button-secondary" type="submit">Cancelar doação</button></div>
+  </form>
+</section>{% endif %}
+{% endblock %}

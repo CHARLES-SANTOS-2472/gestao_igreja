@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Editar conta financeira{% else %}Nova conta financeira{% endif %} · Financeiro{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'financial-account-list' %}">FINANCEIRO</a> / CONTAS</div><h1>{% if object %}Editar conta financeira{% else %}Nova conta financeira{% endif %}</h1><p class="muted">Os dados bancários e documentos do titular só são exibidos a usuários com acesso financeiro.</p></div>
+</div>
+<form method="post" class="panel form-panel">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
+  <section class="form-section">
+    <h2>Identificação</h2>
+    <div class="form-grid">
+      {% include "financeiro/_account_form_field.html" with field=form.name %}
+      {% include "financeiro/_account_form_field.html" with field=form.kind %}
+    </div>
+  </section>
+  <section class="form-section bank-section">
+    <h2>Dados bancários e titularidade</h2>
+    <p class="muted">Preencha para conta bancária. Para um caixa, deixe estes dados em branco.</p>
+    <div class="form-grid">
+      {% include "financeiro/_account_form_field.html" with field=form.bank_name %}
+      {% include "financeiro/_account_form_field.html" with field=form.branch %}
+      {% include "financeiro/_account_form_field.html" with field=form.account_number %}
+      {% include "financeiro/_account_form_field.html" with field=form.account_type %}
+      {% include "financeiro/_account_form_field.html" with field=form.holder_type %}
+      {% include "financeiro/_account_form_field.html" with field=form.holder_name %}
+      {% include "financeiro/_account_form_field.html" with field=form.cnpj extra_class="company-field" %}
+      {% include "financeiro/_account_form_field.html" with field=form.legal_representative_name extra_class="company-field" %}
+      {% include "financeiro/_account_form_field.html" with field=form.legal_representative_cpf extra_class="company-field" %}
+    </div>
+  </section>
+  <section class="form-section">
+    <h2>Controle de saldo</h2>
+    <div class="form-grid">
+      {% include "financeiro/_account_form_field.html" with field=form.opening_balance %}
+      {% include "financeiro/_account_form_field.html" with field=form.active %}
+    </div>
+  </section>
+  <p class="help-text">Para PJ, informe CNPJ, nome e CPF de um representante legal. Não informe senhas, tokens, códigos de acesso ou dados de cartão.</p>
+  <div class="form-actions"><a class="button button-secondary" href="{% if object %}{% url 'financial-account-detail' object.pk %}{% else %}{% url 'financial-account-list' %}{% endif %}">Cancelar</a><button class="button button-primary" type="submit">Salvar conta</button></div>
+</form>
+{% endblock %}
+{% block extra_js %}
+<script>
+  (() => {
+    const kindField = document.getElementById("id_kind");
+    const holderTypeField = document.getElementById("id_holder_type");
+    const bankSection = document.querySelector(".bank-section");
+    const companyFields = document.querySelectorAll(".company-field");
+
+    function updateAccountFields() {
+      const isBank = kindField.value === "bank";
+      bankSection.hidden = !isBank;
+      companyFields.forEach((field) => {
+        field.hidden = !isBank || holderTypeField.value !== "company";
+      });
+      if (!isBank || holderTypeField.value !== "company") {
+        document.getElementById("id_cnpj").value = "";
+        document.getElementById("id_legal_representative_name").value = "";
+        document.getElementById("id_legal_representative_cpf").value = "";
+      }
+      if (!isBank) {
+        ["bank_name", "branch", "account_number", "account_type", "holder_type", "holder_name"].forEach((name) => {
+          const field = document.getElementById(`id_${name}`);
+          field.value = "";
+        });
+      }
+    }
+
+    kindField.addEventListener("change", updateAccountFields);
+    holderTypeField.addEventListener("change", updateAccountFields);
+    updateAccountFields();
+  })();
+</script>
+{% endblock %}

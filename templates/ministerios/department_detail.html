@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ department.name }} · Ministérios{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'department-list' %}">MINISTÉRIOS</a> / DEPARTAMENTO</div><h1>{{ department.name }}</h1><p class="muted">{% if department.active %}Ativo{% else %}Inativo{% endif %}</p></div>
+  {% if perms.ministerios.change_department %}<a class="button button-primary" href="{% url 'department-update' department.pk %}">Editar departamento</a>{% endif %}
+</div>
+<section class="panel">
+  <div class="panel-heading"><div><h2>Informações</h2><p class="muted">Responsabilidade e descrição da equipe.</p></div></div>
+  <dl class="detail-grid">
+    <div><dt>Líder</dt><dd>{% if department.leader %}{% if perms.membros.view_member %}<a class="text-link" href="{% url 'member-detail' department.leader.pk %}">{{ department.leader }}</a>{% else %}{{ department.leader }}{% endif %}{% else %}—{% endif %}</dd></div>
+    <div><dt>Vice-líder</dt><dd>{% if department.vice_leader %}{% if perms.membros.view_member %}<a class="text-link" href="{% url 'member-detail' department.vice_leader.pk %}">{{ department.vice_leader }}</a>{% else %}{{ department.vice_leader }}{% endif %}{% else %}—{% endif %}</dd></div>
+    <div><dt>Membros vinculados</dt><dd>{{ department.members.count }}</dd></div>
+    <div class="detail-wide"><dt>Descrição</dt><dd>{{ department.description|default:"—"|linebreaksbr }}</dd></div>
+  </dl>
+</section>
+<section class="panel upcoming-panel">
+  <div class="panel-heading"><div><h2>Membros e congregados</h2><p class="muted">Pessoas vinculadas a este departamento.</p></div></div>
+  {% if department.members.all %}
+  <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Função</th>{% if perms.membros.view_member %}<th>Contato</th><th></th>{% endif %}</tr></thead><tbody>
+    {% for membership in memberships %}<tr><td>{% if perms.membros.view_member %}<a class="person-link" href="{% url 'member-detail' membership.member.pk %}">{{ membership.member }}</a>{% else %}{{ membership.member }}{% endif %}</td><td>{{ membership.get_role_display }}</td>{% if perms.membros.view_member %}<td>{{ membership.member.mobile|default:membership.member.email|default:"—" }}</td><td><a class="text-link" href="{% url 'member-detail' membership.member.pk %}">Abrir cadastro</a></td>{% endif %}</tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty-compact">Ainda não há pessoas vinculadas a este departamento.</div>{% endif %}
+</section>
+{% if perms.ministerios.view_departmentactivity %}
+<section class="panel upcoming-panel">
+  <div class="panel-heading">
+    <div><h2>Reuniões e atividades</h2><p class="muted">Planejamento e registro das ações deste departamento.</p></div>
+    <div class="page-actions">
+      {% if show_attendance_report %}<a class="button button-secondary" href="{% url 'department-attendance-report' department.pk %}">Relatório de presença</a>{% endif %}
+      {% if perms.ministerios.add_departmentactivity %}<a class="button button-primary" href="{% url 'department-activity-create' department.pk %}">+ Nova atividade</a>{% endif %}
+    </div>
+  </div>
+  {% if activities %}
+  <div class="table-wrap"><table><thead><tr><th>Atividade</th><th>Data e horário</th><th>Responsável</th><th>Situação</th><th></th></tr></thead><tbody>
+    {% for activity in activities %}<tr>
+      <td><a class="person-link" href="{% url 'department-activity-detail' department.pk activity.pk %}">{{ activity.title }}</a><span class="subline">{{ activity.get_kind_display }}{% if activity.location %} · {{ activity.location }}{% endif %}</span></td>
+      <td>{{ activity.starts_at|date:"d/m/Y · H:i" }}{% if activity.ends_at %}<span class="subline">até {{ activity.ends_at|date:"d/m/Y · H:i" }}</span>{% endif %}</td>
+      <td>{{ activity.responsible|default:"—" }}<span class="subline">{{ activity.attendance_present_count }}/{{ activity.participant_count }} presentes</span></td>
+      <td><span class="status-pill {% if activity.status == 'cancelled' %}status-cancelled{% elif activity.status == 'completed' %}status-draft{% endif %}">{{ activity.get_status_display }}</span></td>
+      <td><a class="text-link" href="{% url 'department-activity-detail' department.pk activity.pk %}">Abrir</a></td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty-compact">Ainda não há reuniões ou atividades cadastradas.</div>{% endif %}
+</section>
+{% endif %}
+{% endblock %}

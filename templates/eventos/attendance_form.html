@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Presença · {{ object.event.title }}{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow"><a class="back-link" href="{% url 'event-detail' object.event.pk %}">{{ object.event.title|upper }}</a> / PRESENÇA</div><h1>Atualizar presença</h1><p class="muted">{{ object.display_name }}</p></div></div>
+<form method="post" class="panel narrow-panel">
+  {% csrf_token %}
+  <label class="check-field attendance-check">{{ form.attended }}<span>Participante presente</span></label>
+  {% for error in form.attended.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+  <div class="form-actions"><a class="button button-secondary" href="{% url 'event-detail' object.event.pk %}">Cancelar</a><button class="button button-primary" type="submit">Salvar presença</button></div>
+</form>
+{% endblock %}

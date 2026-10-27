@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Categorias financeiras · Financeiro{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow"><a class="back-link" href="{% url 'financial-dashboard' %}">FINANCEIRO</a> / CONFIGURAÇÃO</div><h1>Categorias financeiras</h1><p class="muted">Classifique receitas e despesas para os relatórios.</p></div>{% if can_add %}<a class="button button-primary" href="{% url 'financial-category-create' %}">+ Nova categoria</a>{% endif %}</div>
+<section class="panel"><div class="table-wrap"><table><thead><tr><th>Categoria</th><th>Tipo</th><th>Situação</th><th></th></tr></thead><tbody>
+  {% for category in categories %}<tr><td>{{ category.name }}</td><td>{{ category.get_kind_display }}</td><td>{% if category.active %}Ativa{% else %}Inativa{% endif %}</td><td>{% if can_change %}<a class="text-link" href="{% url 'financial-category-update' category.pk %}">Editar</a>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="4">Nenhuma categoria cadastrada.</td></tr>{% endfor %}
+</tbody></table></div></section>
+{% endblock %}

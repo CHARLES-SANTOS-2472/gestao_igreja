@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Registrar doação · Financeiro{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow"><a class="back-link" href="{% url 'donation-list' %}">DOAÇÕES</a> / NOVA ENTRADA</div><h1>Registrar doação</h1><p class="muted">Cada registro corresponde a uma destinação. Se uma contribuição for dividida, registre cada parte separadamente.</p></div></div>
+<form method="post" class="panel form-panel">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="message">Doações em dinheiro criam automaticamente uma única receita na categoria “Doações”. O nome do doador fica apenas neste registro restrito. Bens são registrados com quantidade e destino, sem controle de estoque nesta etapa.</div>
+  <div class="form-grid">{% for field in form %}
+    <div class="field donation-field{% if field.name == 'destination_description' %} field-wide{% endif %}" data-donation-field="{{ field.name }}">
+      {% if field.field.widget.input_type == "checkbox" %}<label class="check-field">{{ field }}<span>{{ field.label }}</span></label>
+      {% else %}<label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required">*</span>{% endif %}</label>{{ field }}{% endif %}
+      {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    </div>
+  {% endfor %}</div>
+  <p class="help-text">Para registrar dinheiro, selecione a conta que recebeu o valor; ela deve estar previamente cadastrada. Para bens, informe descrição, quantidade e unidade (por exemplo, kg ou unidade).</p>
+  <div class="form-actions"><a class="button button-secondary" href="{% url 'donation-list' %}">Cancelar</a><button class="button button-primary" type="submit">Salvar doação</button></div>
+</form>
+<script>
+  (() => {
+    const form = document.querySelector(".form-panel");
+    const toggle = (name, visible) => {
+      const field = form.querySelector(`[data-donation-field="${name}"]`);
+      if (!field) return;
+      field.hidden = !visible;
+      field.querySelectorAll("input, select, textarea").forEach((input) => {
+        input.disabled = !visible;
+      });
+    };
+    const updateFields = () => {
+      const type = form.querySelector("#id_donation_type").value;
+      const destination = form.querySelector("#id_destination").value;
+      const isMoney = type === "money";
+      ["amount", "account", "payment_method"].forEach((name) => toggle(name, isMoney));
+      ["description", "quantity", "unit"].forEach((name) => toggle(name, !isMoney));
+      toggle("department", destination === "department");
+      toggle("event", destination === "event");
+      toggle("destination_description", destination === "other");
+    };
+    form.querySelector("#id_donation_type").addEventListener("change", updateFields);
+    form.querySelector("#id_destination").addEventListener("change", updateFields);
+    updateFields();
+  })();
+</script>
+{% endblock %}

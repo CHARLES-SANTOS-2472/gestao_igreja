@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ task.title }} · Tarefas administrativas{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'task-list' %}">TAREFAS</a> / DETALHES</div><h1>{{ task.title }}</h1><p class="muted">{{ task.get_status_display }} · Prioridade {{ task.get_priority_display }}</p></div>
+  {% if can_change %}<a class="button button-primary" href="{% url 'task-update' task.pk %}">Editar tarefa</a>{% endif %}
+</div>
+<section class="panel">
+  <div class="panel-heading"><div><h2>Acompanhamento</h2><p class="muted">Dados da tarefa e responsável atual.</p></div></div>
+  <dl class="detail-grid">
+    <div><dt>Situação</dt><dd>{{ task.get_status_display }}</dd></div>
+    <div><dt>Prioridade</dt><dd>{{ task.get_priority_display }}</dd></div>
+    <div><dt>Responsável</dt><dd>{% if task.assigned_to %}{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}{% else %}Não atribuído{% endif %}</dd></div>
+    <div><dt>Prazo</dt><dd>{% if task.due_date %}{{ task.due_date|date:"d/m/Y" }}{% if is_overdue %} · Atrasada{% endif %}{% else %}Sem prazo{% endif %}</dd></div>
+    <div><dt>Cadastrada por</dt><dd>{{ task.created_by|default:"—" }}</dd></div>
+    <div><dt>Data de conclusão</dt><dd>{{ task.completed_at|date:"d/m/Y H:i"|default:"—" }}</dd></div>
+    <div class="detail-wide"><dt>Descrição</dt><dd>{{ task.description|default:"—"|linebreaksbr }}</dd></div>
+  </dl>
+</section>
+<section class="panel upcoming-panel">
+  <div class="panel-heading"><div><h2>Histórico de alterações</h2><p class="muted">Registro de criação e alterações da tarefa.</p></div></div>
+  {% if task.audit_entries.all %}<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Usuário</th><th>Data</th><th>Dados</th></tr></thead><tbody>
+    {% for audit in task.audit_entries.all %}<tr>
+      <td>{{ audit.get_action_display }}</td><td>{{ audit.actor|default:"Usuário removido" }}</td><td>{{ audit.created_at|date:"d/m/Y H:i" }}</td>
+      <td><details><summary>Ver registro</summary>{% if audit.before_json %}<strong>Antes</strong><pre>{{ audit.before_json }}</pre>{% endif %}<strong>Depois</strong><pre>{{ audit.after_json }}</pre></details></td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty-compact">Nenhuma alteração registrada.</div>{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Relatório de presença · {{ department.name }}{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'department-detail' department.pk %}">{{ department.name|upper }}</a> / RELATÓRIO</div><h1>Relatório de presença</h1><p class="muted">Resumo de reuniões e atividades deste departamento.</p></div>
+</div>
+<section class="stats-grid stats-grid-three" aria-label="Resumo geral de presenças">
+  <article class="stat-card"><span class="stat-label">Presenças registradas</span><strong>{{ present_total }}</strong><span class="stat-note">Participações marcadas como presentes</span></article>
+  <article class="stat-card"><span class="stat-label">Ausências registradas</span><strong>{{ absent_total }}</strong><span class="stat-note">Participações marcadas como ausentes</span></article>
+  <article class="stat-card"><span class="stat-label">Pendentes</span><strong>{{ pending_total }}</strong><span class="stat-note">Ainda não registrados</span></article>
+</section>
+<section class="panel">
+  <div class="panel-heading"><div><h2>Atividades</h2><p class="muted">A frequência é calculada com os participantes vinculados e o status registrado.</p></div></div>
+  {% if report_rows %}
+  <div class="table-wrap"><table><thead><tr><th>Atividade</th><th>Data</th><th>Total</th><th>Presentes</th><th>Ausentes</th><th>Pendentes</th><th>Frequência</th></tr></thead><tbody>
+    {% for row in report_rows %}<tr>
+      <td><a class="person-link" href="{% url 'department-activity-detail' department.pk row.activity.pk %}">{{ row.activity.title }}</a><span class="subline">{{ row.activity.get_status_display }}</span></td>
+      <td>{{ row.activity.starts_at|date:"d/m/Y · H:i" }}</td>
+      <td>{{ row.total }}</td>
+      <td>{{ row.present }}</td>
+      <td>{{ row.absent }}</td>
+      <td>{{ row.pending }}</td>
+      <td>{% if row.has_participants %}{{ row.rate }}%{% else %}—{% endif %}</td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty-state"><div class="empty-icon">✓</div><h3>Nenhuma atividade para exibir</h3><p>Cadastre reuniões ou atividades para iniciar o acompanhamento de presença.</p></div>{% endif %}
+</section>
+{% endblock %}

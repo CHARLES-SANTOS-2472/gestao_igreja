@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Editar tarefa{% else %}Nova tarefa{% endif %} · Gestão da Igreja{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow"><a class="back-link" href="{% url 'task-list' %}">TAREFAS</a> / ADMINISTRAÇÃO</div><h1>{% if object %}Editar tarefa{% else %}Nova tarefa administrativa{% endif %}</h1><p class="muted">Atribua um responsável, defina prazo e prioridade e atualize a situação até a conclusão.</p></div></div>
+<form method="post" class="panel form-panel">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="form-grid">{% for field in form %}<div class="field {% if field.name == 'description' %}field-wide{% endif %}">
+    <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required">*</span>{% endif %}</label>{{ field }}
+    {% if field.help_text %}<span class="help-text">{{ field.help_text }}</span>{% endif %}
+    {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+  </div>{% endfor %}</div>
+  <div class="form-actions"><a class="button button-secondary" href="{% if object %}{% url 'task-detail' object.pk %}{% else %}{% url 'task-list' %}{% endif %}">Cancelar</a><button class="button button-primary" type="submit">Salvar tarefa</button></div>
+</form>
+{% endblock %}

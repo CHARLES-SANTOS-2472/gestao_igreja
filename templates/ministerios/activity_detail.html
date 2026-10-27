@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ activity.title }} · {{ activity.department.name }}{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'department-detail' activity.department.pk %}">{{ activity.department.name|upper }}</a> / ATIVIDADE</div><h1>{{ activity.title }}</h1><p class="muted"><span class="status-pill {% if activity.status == 'cancelled' %}status-cancelled{% elif activity.status == 'completed' %}status-draft{% endif %}">{{ activity.get_status_display }}</span></p></div>
+  <div class="page-actions">
+    {% if perms.ministerios.manage_departmentactivityscales %}<a class="button button-secondary" href="{% url 'department-activity-scale' activity.department.pk activity.pk %}">Gerenciar escala</a>{% endif %}
+    {% if perms.ministerios.manage_departmentattendance %}<a class="button button-primary" href="{% url 'department-activity-attendance' activity.department.pk activity.pk %}">Registrar presença</a>{% endif %}
+    {% if perms.ministerios.change_departmentactivity %}<a class="button button-secondary" href="{% url 'department-activity-update' activity.department.pk activity.pk %}">Editar atividade</a>{% endif %}
+  </div>
+</div>
+<section class="panel">
+  <div class="panel-heading"><div><h2>Informações da atividade</h2><p class="muted">{{ activity.get_kind_display }}</p></div></div>
+  <dl class="detail-grid">
+    <div><dt>Início</dt><dd>{{ activity.starts_at|date:"d/m/Y · H:i" }}</dd></div>
+    <div><dt>Término</dt><dd>{{ activity.ends_at|date:"d/m/Y · H:i"|default:"—" }}</dd></div>
+    <div><dt>Local</dt><dd>{{ activity.location|default:"—" }}</dd></div>
+    <div><dt>Responsável</dt><dd>{% if activity.responsible and perms.membros.view_member %}<a class="text-link" href="{% url 'member-detail' activity.responsible.pk %}">{{ activity.responsible }}</a>{% else %}{{ activity.responsible|default:"—" }}{% endif %}</dd></div>
+    <div class="detail-wide"><dt>Observações</dt><dd>{{ activity.description|default:"—"|linebreaksbr }}</dd></div>
+  </dl>
+</section>
+<section class="panel upcoming-panel">
+  <div class="panel-heading">
+    <div><h2>Escala de funções</h2><p class="muted">{{ activity.assignments.count }} pessoa(s) escalada(s) nesta atividade.</p></div>
+  </div>
+  {% if activity.assignments.all %}
+  <div class="table-wrap"><table><thead><tr><th>Função</th><th>Nome</th></tr></thead><tbody>
+    {% for assignment in activity.assignments.all %}<tr><td>{{ assignment.role_label }}</td><td>{{ assignment.member }}</td></tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty-compact">Ainda não há pessoas escaladas para esta atividade.</div>{% endif %}
+</section>
+<section class="panel upcoming-panel">
+  <div class="panel-heading"><div><h2>Participantes</h2><p class="muted">{{ activity.participants.count }} pessoa(s) vinculada(s) a esta atividade{% if perms.ministerios.view_departmentattendance %} · {{ activity.attendance_record_count }} registro(s) de presença{% endif %}.</p></div></div>
+  {% if activity.participants.all %}
+  <div class="table-wrap"><table><thead><tr><th>Nome</th>{% if perms.membros.view_member %}<th>Contato</th><th></th>{% endif %}</tr></thead><tbody>
+    {% for member in activity.participants.all %}<tr><td>{% if perms.membros.view_member %}<a class="person-link" href="{% url 'member-detail' member.pk %}">{{ member }}</a>{% else %}{{ member }}{% endif %}</td>{% if perms.membros.view_member %}<td>{{ member.mobile|default:member.email|default:"—" }}</td><td><a class="text-link" href="{% url 'member-detail' member.pk %}">Abrir cadastro</a></td>{% endif %}</tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty-compact">Nenhum participante foi selecionado.</div>{% endif %}
+</section>
+{% endblock %}

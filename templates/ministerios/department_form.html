@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Editar departamento{% else %}Novo departamento{% endif %} · Ministérios{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'department-list' %}">MINISTÉRIOS</a> / DEPARTAMENTO</div><h1>{% if object %}Editar departamento{% else %}Novo departamento{% endif %}</h1><p class="muted">Cadastre a área e organize seus responsáveis e participantes.</p></div>
+</div>
+<form method="post" class="panel form-panel">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="form-grid">
+    {% for field in form %}
+    <div class="field {% if field.name == 'name' or field.name == 'description' or field.name == 'participants' %}field-wide{% endif %} {% if field.field.widget.input_type == 'checkbox' %}field-checkbox{% endif %}">
+      {% if field.field.widget.input_type == 'checkbox' %}<label class="check-field">{{ field }}<span>{{ field.label }}</span></label>
+      {% else %}<label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required">*</span>{% endif %}</label>{{ field }}{% endif %}
+      {% if field.help_text %}<span class="help-text">{{ field.help_text }}</span>{% endif %}
+      {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+  <div class="form-actions"><a class="button button-secondary" href="{% if object %}{% url 'department-detail' object.pk %}{% else %}{% url 'department-list' %}{% endif %}">Cancelar</a><button class="button button-primary" type="submit">Salvar departamento</button></div>
+</form>
+{% endblock %}

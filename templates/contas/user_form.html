@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ form_title }} · Usuários{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow"><a class="back-link" href="{% url 'user-list' %}">USUÁRIOS</a> / {% if creating %}NOVO{% else %}EDIÇÃO{% endif %}</div><h1>{{ form_title }}</h1><p class="muted">Usuários comuns acessam somente os módulos escolhidos. Administradores têm acesso total e gerenciam usuários comuns.</p></div></div>
+<form method="post" class="panel form-panel">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
+  <section class="form-section"><h2>Identificação</h2><div class="form-grid">
+    <div class="field"><label for="{{ form.username.id_for_label }}">{{ form.username.label }} <span class="required">*</span></label>{{ form.username }}{% for e in form.username.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+    <div class="field"><label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }} <span class="required">*</span></label>{{ form.first_name }}{% for e in form.first_name.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+    <div class="field"><label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>{{ form.last_name }}{% for e in form.last_name.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+    <div class="field"><label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>{{ form.email }}{% for e in form.email.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+    {% if creating %}
+    <div class="field"><label for="{{ form.password1.id_for_label }}">{{ form.password1.label }} <span class="required">*</span></label>{{ form.password1 }}{% for e in form.password1.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+    <div class="field"><label for="{{ form.password2.id_for_label }}">{{ form.password2.label }} <span class="required">*</span></label>{{ form.password2 }}{% for e in form.password2.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+    {% endif %}
+  </div></section>
+  <section class="form-section"><h2>Perfil e acesso</h2><div class="form-grid">
+    <div class="field field-wide"><label for="{{ form.role.id_for_label }}">{{ form.role.label }}</label>{{ form.role }}{% for e in form.role.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+    {% for field in form.module_fields %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>{% endfor %}
+    <div class="field field-wide"><label class="check-field">{{ form.is_active }}<span>{{ form.is_active.label }}</span></label></div>
+  </div><p class="help-text">O perfil Administrador ignora a escolha por módulo. Quem consulta o Financeiro também vê os dados bancários das contas; conceda esse acesso com cuidado.</p></section>
+  <div class="form-actions"><a class="button button-secondary" href="{% url 'user-list' %}">Cancelar</a><button class="button button-primary" type="submit">Salvar usuário</button></div>
+</form>
+<script>
+  (() => {
+    const role = document.getElementById("{{ form.role.id_for_label }}");
+    const fields = document.querySelectorAll("select[id^='id_access_']");
+    const update = () => fields.forEach((f) => { f.closest(".field").hidden = role.value === "admin"; });
+    role.addEventListener("change", update);
+    update();
+  })();
+</script>
+{% endblock %}

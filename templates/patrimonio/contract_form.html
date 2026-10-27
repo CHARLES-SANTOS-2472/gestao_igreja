@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Editar contrato{% else %}Novo contrato{% endif %} · Patrimônio{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow"><a class="back-link" href="{% url 'contract-list' %}">CONTRATOS</a> / CADASTRO</div><h1>{% if object %}Editar contrato{% else %}Novo contrato{% endif %}</h1><p class="muted">Informe o fornecedor, a vigência e o valor acordado. O sistema destaca vencimentos próximos ao consultar contratos.</p></div></div>
+<form method="post" class="panel form-panel">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="form-grid">{% for field in form %}<div class="field {% if field.name == 'notes' %}field-wide{% endif %}">
+    <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required">*</span>{% endif %}</label>{{ field }}
+    {% if field.name == "supplier" and perms.patrimonio.add_supplier %}<span class="help-text"><a href="{% url 'supplier-create' %}">Cadastrar fornecedor</a> em outra tela, se necessário.</span>{% endif %}
+    {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+  </div>{% endfor %}</div>
+  <div class="form-actions"><a class="button button-secondary" href="{% url 'contract-list' %}">Cancelar</a><button class="button button-primary" type="submit">Salvar contrato</button></div>
+</form>
+{% endblock %}

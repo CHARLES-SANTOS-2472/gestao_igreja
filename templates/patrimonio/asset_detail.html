@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ asset.name }} · Patrimônio{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'asset-list' %}">PATRIMÔNIO</a> / BENS</div><h1>{{ asset.name }}</h1><p class="muted">{{ asset.get_category_display }} · {{ asset.get_status_display }}</p></div>
+  {% if can_change %}<a class="button button-primary" href="{% url 'asset-update' asset.pk %}">Editar bem</a>{% endif %}
+</div>
+<section class="panel">
+  <div class="panel-heading"><div><h2>Identificação do bem</h2></div>{% if can_add_maintenance %}<a class="button button-secondary" href="{% url 'asset-maintenance-create' asset.pk %}">+ Registrar manutenção</a>{% endif %}</div>
+  <dl class="detail-grid">
+    <div><dt>Número patrimonial</dt><dd>{{ asset.asset_tag|default:"—" }}</dd></div><div><dt>Número de série</dt><dd>{{ asset.serial_number|default:"—" }}</dd></div>
+    <div><dt>Localização</dt><dd>{{ asset.location|default:"—" }}</dd></div><div><dt>Situação</dt><dd>{{ asset.get_status_display }}</dd></div>
+    <div><dt>Data de aquisição</dt><dd>{{ asset.acquired_on|date:"d/m/Y"|default:"—" }}</dd></div><div><dt>Valor de aquisição</dt><dd>{% if asset.purchase_value != None %}R$ {{ asset.purchase_value|floatformat:2 }}{% else %}—{% endif %}</dd></div>
+    <div class="detail-wide"><dt>Observações</dt><dd>{{ asset.description|default:"—"|linebreaksbr }}</dd></div>
+  </dl>
+</section>
+{% if can_view_maintenance %}<section class="panel upcoming-panel">
+  <div class="panel-heading"><div><h2>Histórico de manutenção</h2><p class="muted">Serviços e próximas datas de manutenção.</p></div></div>
+  {% if maintenance_records %}<div class="table-wrap"><table><thead><tr><th>Data</th><th>Serviço</th><th>Responsável</th><th>Custo</th><th>Próxima manutenção</th></tr></thead><tbody>
+    {% for record in maintenance_records %}<tr><td>{{ record.maintenance_date|date:"d/m/Y" }}</td><td>{{ record.description }}</td><td>{{ record.performed_by|default:"—" }}</td><td>R$ {{ record.cost|floatformat:2 }}</td><td>{{ record.next_maintenance_on|date:"d/m/Y"|default:"—" }}</td></tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty-compact">Nenhuma manutenção registrada.</div>{% endif %}
+</section>{% endif %}
+{% endblock %}

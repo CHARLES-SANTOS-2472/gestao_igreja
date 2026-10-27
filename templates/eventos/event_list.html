@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Agenda · Gestão da Igreja{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow">CULTOS E PROGRAMAÇÃO</div><h1>Agenda</h1><p class="muted">Organize cultos, eventos e equipes da igreja.</p></div>
+  {% if perms.eventos.add_churchevent %}<a class="button button-primary" href="{% url 'event-create' %}">+ Novo evento</a>{% endif %}
+</div>
+<section class="panel">
+  <form method="get" class="filters">
+    <div class="search-field"><label class="sr-only" for="event-search">Buscar evento</label><input id="event-search" type="search" name="q" value="{{ search_query }}" placeholder="Título ou local"></div>
+    <label class="sr-only" for="event-status">Filtrar situação</label>
+    <select id="event-status" name="status"><option value="">Todas as situações</option>{% for value,label in statuses %}<option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+    <button class="button button-secondary" type="submit">Buscar</button>
+    {% if search_query or selected_status %}<a class="text-link clear-filter" href="{% url 'event-list' %}">Limpar</a>{% endif %}
+  </form>
+  {% if events %}
+  <div class="table-wrap"><table><thead><tr><th>Evento</th><th>Data e horário</th><th>Tipo</th><th>Situação</th><th>Inscritos</th><th></th></tr></thead><tbody>
+    {% for event in events %}<tr>
+      <td><a class="person-link" href="{% url 'event-detail' event.pk %}">{{ event.title }}</a><span class="subline">{{ event.location|default:"Local a definir" }}</span></td>
+      <td>{{ event.starts_at|date:"d/m/Y · H:i" }}<span class="subline">até {{ event.ends_at|date:"d/m/Y · H:i" }}</span></td>
+      <td>{{ event.get_kind_display }}</td>
+      <td><span class="status-pill {% if event.status == 'cancelled' %}status-cancelled{% elif event.status == 'draft' %}status-draft{% endif %}">{{ event.get_status_display }}</span></td>
+      <td>{{ event.registration_count }}{% if event.capacity %} / {{ event.capacity }}{% endif %}</td>
+      <td><a class="text-link" href="{% url 'event-detail' event.pk %}">Abrir</a></td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% if is_paginated %}<nav class="pagination" aria-label="Paginação">{% if page_obj.has_previous %}<a href="?q={{ search_query|urlencode }}&status={{ selected_status|urlencode }}&page={{ page_obj.previous_page_number }}">← Anterior</a>{% endif %}<span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a href="?q={{ search_query|urlencode }}&status={{ selected_status|urlencode }}&page={{ page_obj.next_page_number }}">Próxima →</a>{% endif %}</nav>{% endif %}
+  {% else %}<div class="empty-state"><div class="empty-icon">◷</div><h3>Nenhum evento encontrado</h3><p>Cadastre o primeiro culto ou evento para começar a organizar a agenda.</p>{% if perms.eventos.add_churchevent %}<a class="button button-primary" href="{% url 'event-create' %}">Cadastrar evento</a>{% endif %}</div>{% endif %}
+</section>
+{% endblock %}

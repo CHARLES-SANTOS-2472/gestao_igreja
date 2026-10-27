@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if object %}Editar cadastro{% else %}{{ form_page_title|default:"Novo cadastro" }}{% endif %} · Gestão da Igreja{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{{ person_list_url }}">{{ form_section_label }}</a> / CADASTRO</div><h1>{% if object %}Editar cadastro{% else %}{{ form_page_title|default:"Novo cadastro" }}{% endif %}</h1><p class="muted">Dados pessoais e familiares são acessíveis somente a usuários autorizados.</p></div>
+</div>
+<form method="post" class="panel form-panel">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
+  <section class="form-section"><h2>Dados pessoais</h2>
+    <div class="form-grid">
+      {% for field in form %}{% if field.name in "first_name last_name cpf rg birth_date deceased_on" %}<div class="field {% if field.name == 'first_name' or field.name == 'last_name' %}field-wide{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required">*</span>{% endif %}</label>{{ field }}{% if field.name == "birth_date" or field.name == "deceased_on" %}<span class="help-text">Use o formato dd/mm/aaaa.</span>{% endif %}{% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>{% endif %}{% endfor %}
+      <div class="field field-wide"><label class="check-field deceased-checkbox" for="{{ form.is_deceased.id_for_label }}">{{ form.is_deceased }}<span>{{ form.is_deceased.label }}</span></label>{% for error in form.is_deceased.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>
+      <div class="field field-wide occupation-field">
+        <label for="{{ form.occupation_search.id_for_label }}">{{ form.occupation_search.label }}</label>
+        {{ form.occupation_search }}
+        {{ form.occupation_code }}
+        <span id="occupation-help" class="help-text">Pesquise por nome ou código. Escolha uma opção sugerida para salvar a ocupação oficial.</span>
+        <div id="occupation-suggestions" class="occupation-suggestions" role="listbox" aria-label="Sugestões de profissões" hidden></div>
+        <span id="occupation-status" class="help-text" role="status" aria-live="polite"></span>
+        {% for error in form.occupation_search.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        {% for error in form.occupation_code.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+      <div class="field field-wide">
+        <label for="{{ form.profession.id_for_label }}">{{ form.profession.label }}</label>
+        {{ form.profession }}
+        {% if form.profession.help_text %}<span class="help-text">{{ form.profession.help_text }}</span>{% endif %}
+        {% for error in form.profession.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+    </div>
+  </section>
+  <section class="form-section"><h2>Contato e endereço</h2>
+    <div class="form-grid">
+      {% for field in form %}{% if field.name in "landline mobile email postal_code street number address_extra neighborhood city state" %}<div class="field {% if field.name == 'street' or field.name == 'email' %}field-wide{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.name == "postal_code" %}<span id="cep-status" class="help-text cep-status" role="status" aria-live="polite">Digite o CEP para preencher o endereço automaticamente.</span>{% endif %}{% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>{% endif %}{% endfor %}
+    </div>
+  </section>
+  <section class="form-section"><h2>Vínculo com a igreja</h2>
+    <div class="form-grid">
+      {% for field in form %}{% if field.name in "status joined_on baptized_on baptized_at" %}<div class="field {% if field.name == 'baptized_at' %}field-wide{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.name == "joined_on" or field.name == "baptized_on" %}<span class="help-text">Use o formato dd/mm/aaaa.</span>{% endif %}{% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>{% endif %}{% endfor %}
+    </div>
+  </section>
+  <section class="form-section"><h2>Família</h2><p class="muted family-intro">Os campos são opcionais. Cadastre apenas o nome agora ou selecione uma pessoa que já esteja no sistema. Nomes informados serão salvos como cadastros individuais incompletos, que você pode completar depois.</p>
+    <div class="form-grid">
+      {% for field in form %}{% if field.name == "spouse" or field.name == "spouse_name" or field.name == "parents" or field.name == "parents_names" or field.name == "children" or field.name == "children_names" %}
+      <div class="field field-wide family-field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {% if field.name == "parents" or field.name == "children" %}
+        <div class="repeatable-select" data-repeatable-select>
+        {{ field }}
+          <div class="repeatable-select-rows" data-select-rows></div>
+          <button class="button button-secondary button-small add-family-select" type="button" data-add-select>
+            + Adicionar outro
+          </button>
+        </div>
+        {% else %}{{ field }}{% endif %}
+        {% if field.help_text %}<span class="help-text">{{ field.help_text }}</span>{% endif %}
+        {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+      {% endif %}{% endfor %}
+    </div>
+    {% if object.is_placeholder %}<div class="placeholder-edit">
+      <label class="check-field">{{ form.is_placeholder }}<span>Manter como cadastro familiar incompleto</span></label>
+      <p class="help-text">Desmarque depois de preencher os dados da pessoa e selecione a situação correta no campo “Situação”.</p>
+      {% for error in form.is_placeholder.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    </div>{% endif %}
+  </section>
+  <section class="form-section"><h2>Preferências de contato</h2><p class="muted">Registre autorização antes de qualquer comunicação. Nenhuma mensagem é enviada automaticamente nesta versão.</p>
+    <div class="check-grid">{% for field in form %}{% if field.name == "email_consent" or field.name == "whatsapp_consent" %}<label class="check-field">{{ field }}<span>{{ field.label }}</span>{% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</label>{% endif %}{% endfor %}</div>
+  </section>
+  <div class="form-actions"><a class="button button-secondary" href="{% if object %}{% url 'member-detail' object.pk %}{% else %}{{ person_list_url }}{% endif %}">Cancelar</a><button class="button button-primary" type="submit">Salvar cadastro</button></div>
+</form>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/cep.js' %}?v=20261020" defer></script><script src="{% static 'js/member-form.js' %}?v=20261020" defer></script><script src="{% static 'js/occupation.js' %}?v=20261020" data-search-url="{% url 'cbo-occupation-search' %}" defer></script>{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ form_title }} · Assistência social{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow"><a class="back-link" href="{% url 'assisted-family-list' %}">ASSISTÊNCIA SOCIAL</a> / FAMÍLIAS</div><h1>{{ form_title }}</h1><p class="muted">Cadastre apenas os dados necessários para organizar o contato e a entrega de ajuda.</p></div></div>
+<form method="post" class="panel form-panel">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="form-grid">{% for field in form %}<div class="field {% if field.name == 'street' %}field-wide{% endif %}">
+    {% if field.field.widget.input_type == "checkbox" %}<label class="check-field">{{ field }}<span>{{ field.label }}</span></label>
+    {% else %}<label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required">*</span>{% endif %}</label>{{ field }}{% endif %}
+    {% if field.name == "postal_code" %}<span id="cep-status" class="help-text cep-status" role="status" aria-live="polite">Digite o CEP para preencher o endereço automaticamente.</span>{% endif %}
+    {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+  </div>{% endfor %}</div>
+  <p class="help-text">Ao digitar um CEP completo, somente o CEP será consultado no ViaCEP. Logradouro, bairro, cidade e UF podem ser editados; número e complemento são preenchidos manualmente.</p>
+  {% if object.address %}<div class="message">Endereço informado anteriormente preservado: {{ object.address }}. Preencha os novos campos se desejar atualizar para o formato separado.</div>{% endif %}
+  <div class="message">Acesso restrito. Não registre diagnósticos, relatos pastorais ou documentos pessoais neste cadastro.</div>
+  <div class="form-actions"><a class="button button-secondary" href="{% if object %}{% url 'assisted-family-detail' object.pk %}{% else %}{% url 'assisted-family-list' %}{% endif %}">Cancelar</a><button class="button button-primary" type="submit">Salvar cadastro</button></div>
+</form>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/cep.js' %}?v=20261020" defer></script>{% endblock %}

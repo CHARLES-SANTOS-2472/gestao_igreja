@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Contratos · Patrimônio{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'asset-list' %}">PATRIMÔNIO</a> / ADMINISTRAÇÃO</div><h1>Contratos</h1><p class="muted">Fornecedores, vigências e valores contratados.</p></div>
+  <div class="page-actions">{% if perms.patrimonio.view_supplier %}<a class="button button-secondary" href="{% url 'supplier-list' %}">Fornecedores</a>{% endif %}{% if can_add %}<a class="button button-primary" href="{% url 'contract-create' %}">+ Novo contrato</a>{% endif %}</div>
+</div>
+{% if overdue_contract_count %}<div class="message error">{{ overdue_contract_count }} contrato(s) ativo(s) estão com a vigência vencida. Revise a situação e atualize o cadastro.</div>{% endif %}
+{% if expiring_contracts %}<section class="panel upcoming-panel">
+  <div class="panel-heading"><div><h2>Vencimentos nos próximos 30 dias</h2><p class="muted">Revise os contratos e planeje renovações ou encerramentos.</p></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Contrato</th><th>Fornecedor</th><th>Vencimento</th><th>Dias restantes</th></tr></thead><tbody>
+    {% for contract in expiring_contracts %}<tr><td>{{ contract.title }}</td><td>{{ contract.supplier.name }}</td><td>{{ contract.end_date|date:"d/m/Y" }}</td><td>{{ contract.days_remaining }} dia(s)</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>{% endif %}
+<section class="panel">
+  <form method="get" class="filters">
+    <div class="search-field"><label for="contract-search">Buscar</label><input id="contract-search" type="search" name="q" value="{{ search_query }}" placeholder="Título, número ou fornecedor"></div>
+    <div><label for="contract-state">Situação</label><select id="contract-state" name="state">
+      <option value="">Todos</option><option value="active" {% if selected_state == "active" %}selected{% endif %}>Ativos e vigentes</option><option value="upcoming" {% if selected_state == "upcoming" %}selected{% endif %}>Vencem em 30 dias</option><option value="overdue" {% if selected_state == "overdue" %}selected{% endif %}>Vencidos</option><option value="cancelled" {% if selected_state == "cancelled" %}selected{% endif %}>Cancelados</option>
+    </select></div>
+    <button class="button button-secondary" type="submit">Filtrar</button>
+    {% if search_query or selected_state %}<a class="text-link clear-filter" href="{% url 'contract-list' %}">Limpar</a>{% endif %}
+  </form>
+  {% if contracts %}<div class="table-wrap"><table><thead><tr><th>Contrato</th><th>Fornecedor</th><th>Vigência</th><th>Valor</th><th>Situação</th><th></th></tr></thead><tbody>
+    {% for contract in contracts %}<tr>
+      <td>{{ contract.title }}{% if contract.contract_number %}<span class="subline">{{ contract.contract_number }}</span>{% endif %}</td>
+      <td>{{ contract.supplier.name }}</td><td>{{ contract.start_date|date:"d/m/Y" }} a {{ contract.end_date|date:"d/m/Y" }}</td>
+      <td>{% if contract.value != None %}R$ {{ contract.value|floatformat:2 }}{% else %}—{% endif %}</td>
+      <td>{{ contract.display_status }}</td>
+      <td>{% if perms.patrimonio.change_contract %}<a class="text-link" href="{% url 'contract-update' contract.pk %}">Editar</a>{% endif %}</td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% if is_paginated %}<nav class="pagination" aria-label="Paginação">{% if page_obj.has_previous %}<a href="?q={{ search_query|urlencode }}&state={{ selected_state|urlencode }}&page={{ page_obj.previous_page_number }}">← Anterior</a>{% endif %}<span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a href="?q={{ search_query|urlencode }}&state={{ selected_state|urlencode }}&page={{ page_obj.next_page_number }}">Próxima →</a>{% endif %}</nav>{% endif %}
+  {% else %}<div class="empty-state"><h3>Nenhum contrato encontrado</h3><p>Cadastre contratos vinculados a fornecedores para acompanhar suas vigências.</p>{% if can_add %}<a class="button button-primary" href="{% url 'contract-create' %}">Cadastrar contrato</a>{% endif %}</div>{% endif %}
+</section>
+{% endblock %}

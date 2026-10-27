@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Reservas · Gestão da Igreja{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">ESPAÇOS E EQUIPAMENTOS</div><h1>Reservas</h1><p class="muted">Consulte a disponibilidade e evite conflitos de horários.</p></div>{% if perms.eventos.add_spacereservation %}<a class="button button-primary" href="{% url 'reservation-create' %}">+ Nova reserva</a>{% endif %}</div>
+<section class="panel">
+  {% if reservations %}<div class="table-wrap"><table><thead><tr><th>Espaço/equipamento</th><th>Finalidade</th><th>Evento</th><th>Período</th><th>Situação</th><th></th></tr></thead><tbody>{% for reservation in reservations %}<tr><td class="person-link">{{ reservation.space.name }}</td><td>{{ reservation.purpose }}</td><td>{% if reservation.event %}<a class="text-link" href="{% url 'event-detail' reservation.event.pk %}">{{ reservation.event.title }}</a>{% else %}—{% endif %}</td><td>{{ reservation.starts_at|date:"d/m/Y H:i" }}<span class="subline">até {{ reservation.ends_at|date:"d/m/Y H:i" }}</span></td><td><span class="status-pill {% if reservation.status == 'cancelled' %}status-cancelled{% endif %}">{{ reservation.get_status_display }}</span></td><td>{% if perms.eventos.change_spacereservation %}<a class="text-link" href="{% url 'reservation-update' reservation.pk %}">Editar</a>{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+  {% if is_paginated %}<nav class="pagination" aria-label="Paginação">{% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">← Anterior</a>{% endif %}<span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">Próxima →</a>{% endif %}</nav>{% endif %}
+  {% else %}<div class="empty-state"><div class="empty-icon">⌂</div><h3>Nenhuma reserva registrada</h3><p>Cadastre espaços e equipamentos pelo painel administrativo antes de reservar.</p>{% if perms.eventos.add_spacereservation %}<a class="button button-primary" href="{% url 'reservation-create' %}">Nova reserva</a>{% endif %}</div>{% endif %}
+</section>
+{% endblock %}

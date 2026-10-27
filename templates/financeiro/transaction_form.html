@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ form_title }} · Financeiro{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div><div class="eyebrow"><a class="back-link" href="{% url 'financial-transaction-list' %}">FINANCEIRO</a> / LANÇAMENTO</div><h1>{{ form_title }}</h1><p class="muted">Registre dízimos e ofertas na categoria correspondente. Doações recebidas devem ser cadastradas pela área de Doações para registrar o destino e manter o vínculo contábil. Confirme como recebido somente após a conferência do tesoureiro; pendências não alteram os saldos nem os relatórios realizados.</p>{% if perms.financeiro.view_donationrecord %}<a class="text-link" href="{% url 'donation-list' %}">Acessar doações recebidas</a>{% endif %}</div>
+</div>
+<form method="post" class="panel form-panel">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="form-grid">
+    {% for field in form %}
+    <div class="field {% if field.name == 'title' or field.name == 'notes' %}field-wide{% endif %}">
+      <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required">*</span>{% endif %}</label>
+      {{ field }}
+      {% if field.help_text %}<span class="help-text">{{ field.help_text }}</span>{% endif %}
+      {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+  <p class="help-text">Não informe dados de cartão, senhas bancárias ou credenciais de acesso nas observações.</p>
+  <div class="form-actions"><a class="button button-secondary" href="{% if object %}{% url 'financial-transaction-detail' object.pk %}{% else %}{% url 'financial-dashboard' %}{% endif %}">Cancelar</a><button class="button button-primary" type="submit">Salvar lançamento</button></div>
+</form>
+{% endblock %}

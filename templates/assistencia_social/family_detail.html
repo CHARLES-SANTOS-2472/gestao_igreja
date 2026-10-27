@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ family.reference_name }} · Assistência social{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'assisted-family-list' %}">ASSISTÊNCIA SOCIAL</a> / FAMÍLIAS</div><h1>{{ family.reference_name }}</h1><p class="muted">{% if family.active %}Em acompanhamento{% else %}Acompanhamento encerrado{% endif %}</p></div>
+  <div class="page-actions">{% if can_add_assistance and family.active %}<a class="button button-primary" href="{% url 'assistance-create' family.pk %}">+ Registrar ajuda</a>{% endif %}{% if can_change %}<a class="button button-secondary" href="{% url 'assisted-family-update' family.pk %}">Editar cadastro</a>{% endif %}</div>
+</div>
+<section class="panel">
+  <div class="panel-heading"><div><h2>Dados para acompanhamento</h2><p class="muted">Visíveis somente a usuários com permissão para consultar famílias atendidas.</p></div></div>
+  <dl class="detail-grid">
+    <div><dt>Pessoa de contato</dt><dd>{{ family.contact_name|default:"—" }}</dd></div>
+    <div><dt>Telefone</dt><dd>{{ family.phone|default:"—" }}</dd></div>
+    <div><dt>Bairro</dt><dd>{{ family.neighborhood|default:"—" }}</dd></div>
+    <div><dt>Cidade / UF</dt><dd>{% if family.city %}{{ family.city }}{% if family.state %}/{{ family.state }}{% endif %}{% else %}{{ family.state|default:"—" }}{% endif %}</dd></div>
+    <div><dt>CEP</dt><dd>{{ family.postal_code|default:"—" }}</dd></div>
+    <div><dt>Pessoas no domicílio</dt><dd>{{ family.household_size|default:"—" }}</dd></div>
+    <div class="detail-wide"><dt>Endereço para atendimento</dt><dd>{% if family.street %}{{ family.street }}{% if family.number %}, {{ family.number }}{% endif %}{% if family.address_extra %} — {{ family.address_extra }}{% endif %}{% else %}—{% endif %}</dd></div>
+    {% if family.address %}<div class="detail-wide"><dt>Endereço informado anteriormente</dt><dd>{{ family.address }}</dd></div>{% endif %}
+  </dl>
+  {% if map_query %}<div class="map-privacy-note"><p class="help-text">O Google Maps é um serviço externo. Ao abrir o localizador, o endereço acima será enviado ao Google.</p><a class="button button-secondary" href="https://www.google.com/maps/search/?api=1&amp;query={{ map_query|urlencode }}" target="_blank" rel="noopener noreferrer">Abrir endereço no Google Maps</a></div>{% endif %}
+</section>
+{% if can_view_assistance %}<section class="panel upcoming-panel">
+  <div class="panel-heading"><div><h2>Ajudas sociais</h2><p class="muted">Programações e entregas registradas.</p></div></div>
+  {% if assistance_records %}<div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Quantidade / valor</th><th>Situação</th><th>Responsável</th><th></th></tr></thead><tbody>
+    {% for record in assistance_records %}<tr>
+      <td>{{ record.assistance_date|date:"d/m/Y" }}</td><td>{{ record.get_aid_type_display }}</td><td>{{ record.description|default:"—" }}</td><td>{% if record.amount != None %}R$ {{ record.amount|floatformat:2 }}{% else %}{{ record.quantity }}{% endif %}</td><td>{{ record.get_status_display }}</td>
+      <td>{% if record.delivered_by %}{{ record.delivered_by.get_full_name|default:record.delivered_by.username }}{% elif record.recorded_by %}{{ record.recorded_by.get_full_name|default:record.recorded_by.username }}{% else %}—{% endif %}</td>
+      <td>{% if perms.assistencia_social.change_assistancerecord %}<a class="text-link" href="{% url 'assistance-update' record.pk %}">Editar</a>{% endif %}</td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty-compact">Nenhuma ajuda registrada.</div>{% endif %}
+</section>{% endif %}
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Atualizar ajuda{% else %}Registrar ajuda{% endif %} · Assistência social{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow"><a class="back-link" href="{% url 'assisted-family-detail' family.pk %}">{{ family.reference_name }}</a> / ASSISTÊNCIA</div><h1>{{ form_title|default:"Registrar ajuda social" }}</h1><p class="muted">A ajuda pode ser programada, registrada como entregue ou cancelada.</p></div></div>
+<form method="post" class="panel form-panel">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="form-grid">{% for field in form %}<div class="field {% if field.name == 'description' %}field-wide{% endif %}">
+    <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required">*</span>{% endif %}</label>{{ field }}
+    {% if field.help_text %}<span class="help-text">{{ field.help_text }}</span>{% endif %}
+    {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+  </div>{% endfor %}</div>
+  <div class="message">Não informe diagnósticos, relatos pastorais ou documentos pessoais na descrição.</div>
+  <div class="form-actions"><a class="button button-secondary" href="{% url 'assisted-family-detail' family.pk %}">Cancelar</a><button class="button button-primary" type="submit">Salvar ajuda</button></div>
+</form>
+{% endblock %}

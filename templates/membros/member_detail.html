@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ member }} · Gestão da Igreja{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow">{% if member.status == "visitor" or member.status == "new_convert" %}<a class="back-link" href="{% url 'visitor-list' %}">VISITANTES</a>{% elif member.is_placeholder %}<a class="back-link" href="{% url 'member-list' %}?group=all&status=pending">CADASTROS</a>{% else %}<a class="back-link" href="{% url 'member-list' %}?group=members">MEMBROS</a>{% endif %} / PERFIL</div><h1>{{ member }}{% if member.is_deceased %}<span class="memorial-pill">In memoriam</span>{% endif %}</h1><p class="muted"><span class="status-pill">{{ member.get_status_display }}</span>{% if member.is_placeholder %} <span class="status-pill status-draft">Complete os dados desta pessoa para finalizar o cadastro</span>{% endif %}</p></div>
+  <div class="page-actions">
+    {% if perms.membros.change_member %}<a class="button button-secondary" href="{% url 'member-update' member.pk %}">Editar cadastro</a>{% endif %}
+    {% if perms.membros.change_member and member.status == "visitor" or perms.membros.change_member and member.status == "new_convert" %}
+    <form method="post" action="{% url 'visitor-promote' member.pk %}" onsubmit="return confirm('Deseja transformar este cadastro em membro?');">
+      {% csrf_token %}
+      <button class="button button-primary" type="submit">Tornar membro</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+<div class="detail-grid">
+  <section class="panel detail-card"><h2>Dados pessoais</h2><dl class="detail-list">
+    <div><dt>Data de nascimento</dt><dd>{{ member.birth_date|date:"d/m/Y"|default:"—" }}</dd></div>
+    <div><dt>Situação</dt><dd>{% if member.is_deceased %}In memoriam{% else %}Vivo(a){% endif %}</dd></div>
+    {% if member.deceased_on %}<div><dt>Data de falecimento</dt><dd>{{ member.deceased_on|date:"d/m/Y" }}</dd></div>{% endif %}
+    <div><dt>Profissão</dt><dd>{% if member.cbo_occupation %}{{ member.cbo_occupation.title }} <span class="subline">CBO {{ member.cbo_occupation.code }}</span>{% else %}{{ member.profession|default:"—" }}{% endif %}</dd></div>
+    <div><dt>CPF</dt><dd>{{ member.cpf|default:"—" }}</dd></div>
+    <div><dt>RG</dt><dd>{{ member.rg|default:"—" }}</dd></div>
+  </dl></section>
+  <section class="panel detail-card"><h2>Contato e endereço</h2><dl class="detail-list">
+    <div><dt>Celular / WhatsApp</dt><dd>{{ member.mobile|default:"—" }}</dd></div>
+    <div><dt>Telefone fixo</dt><dd>{{ member.landline|default:"—" }}</dd></div>
+    <div><dt>E-mail</dt><dd>{{ member.email|default:"—" }}</dd></div>
+    <div><dt>Endereço</dt><dd>{{ member.full_address|default:"—" }}</dd></div>
+  </dl></section>
+  <section class="panel detail-card"><h2>Vínculo com a igreja</h2><dl class="detail-list">
+    <div><dt>Data de entrada</dt><dd>{{ member.joined_on|date:"d/m/Y"|default:"—" }}</dd></div>
+    <div><dt>Batismo</dt><dd>{{ member.baptized_on|date:"d/m/Y"|default:"—" }}</dd></div>
+    <div><dt>Igreja do batismo</dt><dd>{{ member.baptized_at|default:"—" }}</dd></div>
+  </dl></section>
+  <section class="panel detail-card"><h2>Família</h2><dl class="detail-list">
+    <div><dt>Cônjuge</dt><dd>{% if spouse %}<a class="text-link" href="{% url 'member-detail' spouse.pk %}">{{ spouse }}</a>{% else %}—{% endif %}</dd></div>
+    <div><dt>Pais / responsáveis</dt><dd>{% for parent in member.parents.all %}<a class="family-link" href="{% url 'member-detail' parent.pk %}">{{ parent }}</a>{% empty %}—{% endfor %}</dd></div>
+    <div><dt>Filhos</dt><dd>{% for child in member.children.all %}<a class="family-link" href="{% url 'member-detail' child.pk %}">{{ child }}</a>{% empty %}—{% endfor %}</dd></div>
+  </dl></section>
+</div>
+<p class="privacy-note detail-privacy">Consentimento para e-mail: {% if member.email_consent %}autorizado{% else %}não registrado{% endif %} · WhatsApp: {% if member.whatsapp_consent %}autorizado{% else %}não registrado{% endif %}.</p>
+{% endblock %}

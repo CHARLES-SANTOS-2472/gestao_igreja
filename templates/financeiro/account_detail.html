@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ account.name }} · Contas financeiras{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'financial-account-list' %}">FINANCEIRO</a> / CONTAS</div><h1>{{ account.name }}</h1><p class="muted">{{ account.get_kind_display }} · {% if account.active %}Ativa{% else %}Inativa{% endif %}</p></div>
+  {% if can_change %}<a class="button button-primary" href="{% url 'financial-account-update' account.pk %}">Editar conta</a>{% endif %}
+</div>
+<section class="panel">
+  <div class="panel-heading"><div><h2>Dados da conta</h2><p class="muted">Informações restritas a usuários com permissão para visualizar contas financeiras.</p></div></div>
+  <dl class="detail-grid">
+    <div><dt>Banco</dt><dd>{{ account.bank_name|default:"—" }}</dd></div>
+    <div><dt>Tipo da conta</dt><dd>{{ account.get_account_type_display|default:"—" }}</dd></div>
+    <div><dt>Agência</dt><dd>{{ account.branch|default:"—" }}</dd></div>
+    <div><dt>Número da conta</dt><dd>{{ account.account_number|default:"—" }}</dd></div>
+    <div><dt>Titularidade</dt><dd>{{ account.get_holder_type_display|default:"—" }}</dd></div>
+    <div><dt>Titular / razão social</dt><dd>{{ account.holder_name|default:"—" }}</dd></div>
+    {% if account.holder_type == "company" %}
+    <div><dt>CNPJ</dt><dd>{{ account.cnpj }}</dd></div>
+    <div><dt>Representante legal</dt><dd>{{ account.legal_representative_name }}</dd></div>
+    <div><dt>CPF do representante</dt><dd>{{ account.legal_representative_cpf }}</dd></div>
+    {% endif %}
+    <div><dt>Saldo inicial</dt><dd>R$ {{ account.opening_balance|floatformat:2 }}</dd></div>
+  </dl>
+</section>
+{% endblock %}
