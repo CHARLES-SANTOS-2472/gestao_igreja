@@ -6,6 +6,8 @@ from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
 
+from .cnpj import lookup_cnpj
+
 from eventos.models import ChurchEvent
 from ministerios.models import Department
 
@@ -239,6 +241,20 @@ class FinancialAccountForm(forms.ModelForm):
                 "Informe o CPF do representante com 11 números."
             )
         return value
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("holder_type") == "company" and cleaned.get("cnpj"):
+            if not cleaned.get("holder_name") or not cleaned.get(
+                "legal_representative_name"
+            ):
+                info = lookup_cnpj(cleaned["cnpj"])
+                if info:
+                    cleaned["holder_name"] = cleaned.get("holder_name") or info["legal_name"]
+                    cleaned["legal_representative_name"] = (
+                        cleaned.get("legal_representative_name") or info["representative"]
+                    )
+        return cleaned
 
 
 class FinancialTransactionFilterForm(forms.Form):
@@ -481,6 +497,15 @@ class PixKeyForm(forms.ModelForm):
             active = list(FinancialAccount.objects.filter(active=True)[:2])
             account = active[0] if len(active) == 1 else None
             cleaned["account"] = account
+        if not cleaned.get("receiver_name") or not cleaned.get("city"):
+            info = lookup_cnpj(key) if key_type == "cnpj" else None
+            if info:
+                cleaned["receiver_name"] = (
+                    cleaned.get("receiver_name") or info["trade_name"] or info["legal_name"]
+                )
+                cleaned["city"] = cleaned.get("city") or info["city"]
+                if not cleaned.get("label") and info["trade_name"]:
+                    cleaned["label"] = f"Pix {info['trade_name']}"
         if not cleaned.get("label"):
             cleaned["label"] = f"Pix {dict(PixKey.KeyType.choices).get(key_type, '')}".strip()
         if not cleaned.get("receiver_name"):

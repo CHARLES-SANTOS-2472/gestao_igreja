@@ -5,6 +5,7 @@ from .views import (
     CardMachineListView,
     CardMachineUpdateView,
     PixKeyCreateView,
+    PixKeyDeleteView,
     PixKeyListView,
     PixKeyUpdateView,
     DonationRecordCancelView,
@@ -34,6 +35,7 @@ urlpatterns = [
     path("chaves-pix/", PixKeyListView.as_view(), name="pix-key-list"),
     path("chaves-pix/nova/", PixKeyCreateView.as_view(), name="pix-key-create"),
     path("chaves-pix/<int:pk>/editar/", PixKeyUpdateView.as_view(), name="pix-key-update"),
+    path("chaves-pix/<int:pk>/excluir/", PixKeyDeleteView.as_view(), name="pix-key-delete"),
     path("maquininhas/", CardMachineListView.as_view(), name="card-machine-list"),
     path("maquininhas/nova/", CardMachineCreateView.as_view(), name="card-machine-create"),
     path(

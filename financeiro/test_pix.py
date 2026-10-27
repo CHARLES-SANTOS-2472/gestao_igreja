@@ -1,4 +1,4 @@
-﻿from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.test import TestCase
 from django.urls import reverse
@@ -70,7 +70,13 @@ class PixViewTests(TestCase):
 
 class PixKeyAndMachineTests(TestCase):
     def setUp(self):
+        from unittest import mock
+
         from .models import CardMachine, FinancialAccount, PixKey
+
+        patcher = mock.patch('financeiro.forms.lookup_cnpj', return_value=None)
+        self.lookup = patcher.start()
+        self.addCleanup(patcher.stop)
 
         self.PixKey, self.CardMachine = PixKey, CardMachine
         self.user = get_user_model().objects.create_superuser("adm", password="x")
@@ -143,3 +149,28 @@ class PixKeyAndMachineTests(TestCase):
         self.assertEqual(key.key, "36605928000147")
         self.assertEqual(key.account, self.account)
         self.assertTrue(key.label and key.receiver_name and key.city)
+
+    def test_cnpj_lookup_fills_receiver_and_city(self):
+        self.lookup.return_value = {
+            "legal_name": "Comunidade Familia da Fe",
+            "trade_name": "Codff",
+            "city": "Mage",
+            "representative": "",
+            "situation": "ATIVA",
+        }
+        self.client.post(reverse("pix-key-create"), {"key": "36605928000147", "active": "on"})
+        key = self.PixKey.objects.get()
+        self.assertEqual((key.receiver_name, key.city), ("Codff", "Mage"))
+
+    def test_delete_key(self):
+        self.client.post(reverse("pix-key-create"), {"key": "36605928000147", "active": "on"})
+        key = self.PixKey.objects.get()
+        self.assertContains(self.client.get(reverse("pix-key-delete", args=[key.pk])), "Excluir chave")
+        self.client.post(reverse("pix-key-delete", args=[key.pk]))
+        self.assertFalse(self.PixKey.objects.exists())
+
+    def test_delete_requires_permission(self):
+        viewer = get_user_model().objects.create_user("v", password="x")
+        self.client.force_login(viewer)
+        key = self.PixKey.objects.create(key="a@b.com", key_type="email")
+        self.assertEqual(self.client.post(reverse("pix-key-delete", args=[key.pk])).status_code, 403)

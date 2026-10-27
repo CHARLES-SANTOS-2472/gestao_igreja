@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Excluir chave Pix · Financeiro{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow"><a class="back-link" href="{% url 'pix-key-list' %}">CHAVES PIX</a> / EXCLUIR</div><h1>Excluir chave Pix</h1></div></div>
+<form method="post" class="panel form-panel narrow-panel">
+  {% csrf_token %}
+  <p>Excluir a chave <strong>{{ object.label }}</strong> ({{ object.masked_key }})? Os lançamentos já registrados não são afetados. Para apenas deixar de usá-la, prefira desmarcar “ativa” na edição.</p>
+  <div class="form-actions"><a class="button button-secondary" href="{% url 'pix-key-list' %}">Cancelar</a><button class="button button-primary" type="submit">Excluir chave</button></div>
+</form>
+{% endblock %}

@@ -15,7 +15,7 @@ from urllib.parse import urlencode
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views import View
-from django.views.generic import CreateView, DetailView, ListView, TemplateView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 
 from .forms import (
     CardMachineForm,
@@ -156,6 +156,7 @@ class PixKeyListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["can_add"] = self.request.user.has_perm("financeiro.add_pixkey")
         context["can_change"] = self.request.user.has_perm("financeiro.change_pixkey")
+        context["can_delete"] = self.request.user.has_perm("financeiro.delete_pixkey")
         return context
 
 
@@ -182,6 +183,17 @@ class PixKeyUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         messages.success(self.request, "Chave Pix atualizada.")
+        return super().form_valid(form)
+
+
+class PixKeyDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = PixKey
+    template_name = "financeiro/pixkey_confirm_delete.html"
+    permission_required = "financeiro.delete_pixkey"
+    success_url = reverse_lazy("pix-key-list")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Chave Pix excluída.")
         return super().form_valid(form)
 
 
