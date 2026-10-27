@@ -166,17 +166,19 @@ class PixKey(models.Model):
         PHONE = "phone", "Celular"
         RANDOM = "random", "Chave aleatória"
 
-    label = models.CharField("identificação", max_length=100)
+    label = models.CharField("identificação", max_length=100, blank=True)
     account = models.ForeignKey(
         FinancialAccount,
         verbose_name="conta que recebe",
         on_delete=models.PROTECT,
         related_name="pix_keys",
+        null=True,
+        blank=True,
     )
-    key_type = models.CharField("tipo da chave", max_length=10, choices=KeyType.choices)
+    key_type = models.CharField("tipo da chave", max_length=10, choices=KeyType.choices, blank=True)
     key = models.CharField("chave Pix", max_length=77, unique=True)
-    receiver_name = models.CharField("nome do recebedor", max_length=25)
-    city = models.CharField("cidade", max_length=15)
+    receiver_name = models.CharField("nome do recebedor", max_length=25, blank=True)
+    city = models.CharField("cidade", max_length=15, blank=True)
     is_default = models.BooleanField("chave padrão", default=False)
     active = models.BooleanField("ativa", default=True)
     created_at = models.DateTimeField("cadastrada em", auto_now_add=True)

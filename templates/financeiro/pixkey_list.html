@@ -6,7 +6,7 @@
   {% for key in keys %}<tr>
     <td>{{ key.label }}{% if key.is_default %}<span class="subline">Chave padrão</span>{% endif %}</td>
     <td>{{ key.get_key_type_display }}</td><td>{{ key.masked_key }}</td>
-    <td>{{ key.receiver_name }} · {{ key.city }}</td><td>{{ key.account }}</td>
+    <td>{{ key.receiver_name }} · {{ key.city }}</td><td>{{ key.account|default:"—" }}</td>
     <td>{% if key.active %}Ativa{% else %}Inativa{% endif %}</td>
     <td>{% if can_change %}<a class="text-link" href="{% url 'pix-key-update' key.pk %}">Editar</a>{% endif %}</td>
   </tr>

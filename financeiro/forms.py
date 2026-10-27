@@ -1,6 +1,8 @@
 import re
+import unicodedata
 
 from django import forms
+from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
 
@@ -397,64 +399,103 @@ class PixKeyForm(forms.ModelForm):
     class Meta:
         model = PixKey
         fields = (
+            "key",
+            "key_type",
             "label",
             "account",
-            "key_type",
-            "key",
             "receiver_name",
             "city",
             "is_default",
             "active",
         )
         help_texts = {
-            "receiver_name": "Como aparece para quem paga (até 25 letras, sem acentos).",
-            "city": "Até 15 letras, sem acentos.",
+            "key": "Informe só a chave. Os demais campos são preenchidos automaticamente se ficarem em branco.",
+            "key_type": "Em branco: detectado pela chave (para 11 números, escolha CPF ou Celular).",
+            "label": "Em branco: usa o tipo da chave.",
+            "account": "Em branco: usa a única conta ativa, se houver.",
+            "receiver_name": "Em branco: usa o titular da conta ou o nome padrão (até 25 letras).",
+            "city": "Em branco: usa a cidade padrão (até 15 letras).",
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        for name in ("key_type", "label", "account", "receiver_name", "city"):
+            self.fields[name].required = False
         self.fields["account"].queryset = FinancialAccount.objects.filter(
             Q(active=True) | Q(pk=getattr(self.instance, "account_id", None))
         )
 
-    def clean_key(self):
-        return self.cleaned_data["key"].strip()
+    @staticmethod
+    def detect_type(key):
+        digits = re.sub(r"\D", "", key)
+        if "@" in key:
+            return "email"
+        if key.startswith("+"):
+            return "phone"
+        if re.fullmatch(r"[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}", key):
+            return "random"
+        if len(digits) == 14:
+            return "cnpj"
+        if len(digits) == 11:
+            return "cpf"
+        if len(digits) in (10, 12, 13):
+            return "phone"
+        return ""
+
+    @staticmethod
+    def _ascii(value, limit):
+        text = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode()
+        return re.sub(r"[^A-Za-z0-9 ]", "", text).strip()[:limit]
 
     def clean(self):
         cleaned = super().clean()
-        key_type = cleaned.get("key_type")
-        key = cleaned.get("key", "")
-        if key_type and key:
-            digits = re.sub(r"\D", "", key)
-            if key_type in ("cnpj", "cpf"):
-                size = 14 if key_type == "cnpj" else 11
-                if len(digits) != size:
-                    self.add_error("key", f"Informe o {key_type.upper()} com {size} números.")
-                else:
-                    cleaned["key"] = digits
-            elif key_type == "phone":
-                number = digits[2:] if digits.startswith("55") and len(digits) > 11 else digits
-                if len(number) not in (10, 11):
-                    self.add_error("key", "Informe o celular com DDD.")
-                else:
-                    cleaned["key"] = f"+55{number}"
-            elif key_type == "email":
-                if "@" not in key or " " in key:
-                    self.add_error("key", "Informe um e-mail válido.")
-                else:
-                    cleaned["key"] = key.lower()
-            elif not re.fullmatch(r"[0-9a-fA-F-]{32,36}", key):
-                self.add_error("key", "A chave aleatória deve ter o formato de 32 caracteres (UUID).")
+        key = (cleaned.get("key") or "").strip()
+        if not key:
+            return cleaned
+        key_type = cleaned.get("key_type") or self.detect_type(key)
+        digits = re.sub(r"\D", "", key)
+        if key_type in ("cnpj", "cpf"):
+            size = 14 if key_type == "cnpj" else 11
+            if len(digits) != size:
+                self.add_error("key", f"Informe o {key_type.upper()} com {size} números.")
+            key = digits
+        elif key_type == "phone":
+            number = digits[2:] if digits.startswith("55") and len(digits) > 11 else digits
+            if len(number) not in (10, 11):
+                self.add_error("key", "Informe o celular com DDD.")
+            key = f"+55{number}"
+        elif key_type == "email":
+            if "@" not in key or " " in key:
+                self.add_error("key", "Informe um e-mail válido.")
+            key = key.lower()
+        elif key_type == "random":
+            if not re.fullmatch(r"[0-9a-fA-F-]{32,36}", key):
+                self.add_error("key", "A chave aleatória deve ter 32 caracteres (UUID).")
+        else:
+            self.add_error("key", "Não consegui identificar o tipo da chave. Escolha o tipo.")
+        cleaned["key"] = key
+        cleaned["key_type"] = key_type
+
+        account = cleaned.get("account")
+        if not account:
+            active = list(FinancialAccount.objects.filter(active=True)[:2])
+            account = active[0] if len(active) == 1 else None
+            cleaned["account"] = account
+        if not cleaned.get("label"):
+            cleaned["label"] = f"Pix {dict(PixKey.KeyType.choices).get(key_type, '')}".strip()
+        if not cleaned.get("receiver_name"):
+            cleaned["receiver_name"] = (
+                (account.holder_name if account else "") or settings.PIX_RECEIVER_NAME
+            )
+        cleaned["receiver_name"] = self._ascii(cleaned["receiver_name"], 25)
+        cleaned["city"] = self._ascii(cleaned.get("city") or settings.PIX_CITY, 15)
         return cleaned
 
-    def clean_receiver_name(self):
-        return self.cleaned_data["receiver_name"].strip()
-
     def _post_clean(self):
+        for name in ("key", "key_type", "label", "account", "receiver_name", "city"):
+            if name in self.cleaned_data:
+                setattr(self.instance, name, self.cleaned_data[name])
         super()._post_clean()
-        key = self.cleaned_data.get("key")
-        if key:
-            self.instance.key = key
         duplicate = PixKey.objects.filter(key=self.instance.key).exclude(pk=self.instance.pk)
         if self.instance.key and duplicate.exists():
             self.add_error("key", "Esta chave Pix já está cadastrada.")

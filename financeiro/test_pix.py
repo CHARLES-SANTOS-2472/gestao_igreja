@@ -132,3 +132,14 @@ class PixKeyAndMachineTests(TestCase):
         self.assertEqual(form.initial["payment_method"], "debit_card")
         self.assertEqual(form.initial["account"], self.account)
         self.assertEqual(str(form.initial["amount"]), "50.00")
+
+    def test_only_key_autofills_everything(self):
+        response = self.client.post(
+            reverse("pix-key-create"), {"key": "36.605.928/0001-47", "active": "on"}
+        )
+        self.assertRedirects(response, reverse("pix-key-list"))
+        key = self.PixKey.objects.get()
+        self.assertEqual(key.key_type, "cnpj")
+        self.assertEqual(key.key, "36605928000147")
+        self.assertEqual(key.account, self.account)
+        self.assertTrue(key.label and key.receiver_name and key.city)
