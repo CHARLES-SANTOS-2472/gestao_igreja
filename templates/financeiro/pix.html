@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}QR Code Pix · Gestão da Igreja{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'financial-dashboard' %}">FINANCEIRO</a> / PIX</div><h1>Dízimos e ofertas por Pix</h1><p class="muted">Escolha o tipo, informe o valor se quiser e apresente o QR Code ou envie o código copia e cola. O tipo vai identificado no código Pix.</p></div>
+</div>
+<section class="panel pix-panel">
+  <form method="get" class="pix-form">
+    <div class="field"><label for="pix-tipo">Tipo de contribuição</label>
+      <select id="pix-tipo" name="tipo" onchange="this.form.submit()">
+        <option value="dizimo" {% if purpose == "dizimo" %}selected{% endif %}>Dízimo</option>
+        <option value="oferta" {% if purpose == "oferta" %}selected{% endif %}>Oferta</option>
+      </select></div>
+    <div class="field"><label for="pix-valor">Valor (opcional)</label><input id="pix-valor" name="valor" inputmode="decimal" placeholder="Em branco: o doador digita" value="{% if amount %}{{ amount }}{% endif %}"></div>
+    <button class="button button-primary" type="submit">Gerar</button>
+  </form>
+  <div class="pix-result">
+    <div class="pix-qr" role="img" aria-label="QR Code Pix para {{ purpose_label }}">{{ qr_svg }}</div>
+    <div class="pix-copy">
+      <h2>{{ purpose_label }}{% if amount %} · R$ {{ amount|floatformat:2 }}{% endif %}</h2>
+      <label for="pix-code">Pix copia e cola</label>
+      <textarea id="pix-code" readonly rows="6">{{ payload }}</textarea>
+      <div class="page-actions">
+        <button class="button button-secondary" type="button" id="pix-copy-button">Copiar código</button>
+        {% if can_add_transaction and category %}<a class="button button-primary" href="{% url 'financial-transaction-create' %}?categoria={{ category.pk }}&titulo={{ purpose_label|urlencode }}">Registrar recebimento</a>{% endif %}
+      </div>
+      <p class="help-text">O banco não avisa o sistema automaticamente. Após conferir o extrato, use “Registrar recebimento” para lançar na categoria {{ category.name|default:purpose_label }}.</p>
+    </div>
+  </div>
+</section>
+<script>
+  document.getElementById("pix-copy-button").addEventListener("click", async (event) => {
+    const code = document.getElementById("pix-code");
+    code.select();
+    try { await navigator.clipboard.writeText(code.value); } catch (e) { document.execCommand("copy"); }
+    event.target.textContent = "Código copiado";
+  });
+</script>
+{% endblock %}

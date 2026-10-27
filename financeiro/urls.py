@@ -18,11 +18,13 @@ from .views import (
     FinancialTransactionDetailView,
     FinancialTransactionListView,
     FinancialTransactionUpdateView,
+    PixContributionView,
 )
 
 urlpatterns = [
     path("", FinancialDashboardView.as_view(), name="financial-dashboard"),
     path("relatorios/", FinancialReportView.as_view(), name="financial-report"),
+    path("pix/", PixContributionView.as_view(), name="financial-pix"),
     path("doacoes/", DonationRecordListView.as_view(), name="donation-list"),
     path("doacoes/nova/", DonationRecordCreateView.as_view(), name="donation-create"),
     path(

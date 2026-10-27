@@ -148,6 +148,12 @@ input:focus, select:focus, textarea:focus { outline: 3px solid #dcebe4; border-c
 .field { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .bank-section[hidden], .company-field[hidden], .donation-field[hidden], .field[hidden] { display: none; }
 .user-menu .user-link { color: #e3d2ac; }
+.pix-form { display: flex; flex-wrap: wrap; gap: 14px; align-items: end; margin-bottom: 22px; }
+.pix-result { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+.pix-qr { width: 260px; max-width: 100%; padding: 12px; background: #fff; border: 2px solid #c9a24b; border-radius: 12px; }
+.pix-qr svg { width: 100%; height: auto; display: block; }
+.pix-copy { flex: 1; min-width: 260px; }
+.pix-copy textarea { width: 100%; font-family: monospace; font-size: 0.8rem; }
 .field-wide { grid-column: span 2; }
 .field label { color: #475952; font-size: 12px; font-weight: 650; }
 .field select[multiple] { min-height: 130px; }

@@ -5,6 +5,11 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-change-before-deploying")
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+
+# Dados do Pix da igreja (chave CNPJ informada no projeto). Ajuste por variáveis de ambiente.
+PIX_KEY = os.environ.get("PIX_KEY", "36605928000147")
+PIX_RECEIVER_NAME = os.environ.get("PIX_RECEIVER_NAME", "Igreja Evangelica")
+PIX_CITY = os.environ.get("PIX_CITY", "Brasil")
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")

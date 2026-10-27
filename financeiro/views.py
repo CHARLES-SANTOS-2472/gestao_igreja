@@ -3,6 +3,8 @@ from datetime import date
 from decimal import Decimal
 
 from django.contrib import messages
+from django.conf import settings
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db import transaction
 from django.db.models import Count, DecimalField, ExpressionWrapper, F, Q, Sum, Value
@@ -22,6 +24,7 @@ from .forms import (
     FinancialTransactionFilterForm,
     FinancialTransactionForm,
 )
+from .pix import build_pix_payload, qr_svg
 from .models import (
     DonationRecord,
     FinancialAccount,
@@ -48,6 +51,53 @@ def transaction_snapshot(entry):
         "evento": str(entry.event) if entry.event else None,
         "observações": entry.notes,
     }
+
+
+class PixContributionView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
+    template_name = "financeiro/pix.html"
+    permission_required = "financeiro.view_financialtransaction"
+
+    PURPOSES = {
+        "dizimo": ("Dízimo", "Dízimos", "DIZIMO"),
+        "oferta": ("Oferta", "Ofertas", "OFERTA"),
+    }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        purpose = self.request.GET.get("tipo", "dizimo")
+        if purpose not in self.PURPOSES:
+            purpose = "dizimo"
+        label, category_name, reference = self.PURPOSES[purpose]
+        amount = None
+        raw_amount = self.request.GET.get("valor", "").replace(",", ".").strip()
+        if raw_amount:
+            try:
+                amount = Decimal(raw_amount).quantize(Decimal("0.01"))
+                if amount <= 0 or amount > Decimal("99999999.99"):
+                    amount = None
+            except ArithmeticError:
+                amount = None
+        payload = build_pix_payload(
+            settings.PIX_KEY,
+            settings.PIX_RECEIVER_NAME,
+            settings.PIX_CITY,
+            amount=amount,
+            reference=reference,
+        )
+        context.update(
+            purpose=purpose,
+            purpose_label=label,
+            amount=amount,
+            payload=payload,
+            qr_svg=mark_safe(qr_svg(payload)),
+            category=FinancialCategory.objects.filter(
+                name=category_name, kind=FinancialCategory.Kind.INCOME
+            ).first(),
+            can_add_transaction=self.request.user.has_perm(
+                "financeiro.add_financialtransaction"
+            ),
+        )
+        return context
 
 
 class FinancialDashboardView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
@@ -232,6 +282,23 @@ class FinancialTransactionCreateView(
     form_class = FinancialTransactionForm
     template_name = "financeiro/transaction_form.html"
     permission_required = "financeiro.add_financialtransaction"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        category = FinancialCategory.objects.filter(
+            pk=self.request.GET.get("categoria", "").strip() or 0,
+            kind=FinancialCategory.Kind.INCOME,
+        ).first()
+        if category:
+            initial.update(
+                kind=FinancialTransaction.Kind.INCOME,
+                category=category,
+                payment_method=FinancialTransaction.PaymentMethod.PIX,
+            )
+            title = self.request.GET.get("titulo", "").strip()[:150]
+            if title:
+                initial["title"] = title
+        return initial
 
     @transaction.atomic
     def form_valid(self, form):
