@@ -5,6 +5,7 @@
   <div><div class="eyebrow">GESTÃO FINANCEIRA</div><h1>Financeiro</h1><p class="muted">Resumo de {{ today|date:"F Y" }}. Somente lançamentos recebidos ou pagos entram nos totais realizados.</p></div>
   <div class="page-actions">
     <a class="button button-secondary" href="{% url 'financial-pix' %}">QR Code Pix</a>
+    {% if can_manage_accounts %}<a class="button button-secondary" href="{% url 'pix-key-list' %}">Chaves Pix</a><a class="button button-secondary" href="{% url 'card-machine-list' %}">Maquininhas</a>{% endif %}
     <a class="button button-secondary" href="{% url 'financial-report' %}">Relatórios</a>
     {% if can_view_donations %}<a class="button button-secondary" href="{% url 'donation-list' %}">Doações</a>{% endif %}
     <a class="button button-secondary" href="{% url 'financial-transaction-list' %}">Ver lançamentos</a>

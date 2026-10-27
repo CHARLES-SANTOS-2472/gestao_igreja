@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Chaves Pix · Financeiro{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow"><a class="back-link" href="{% url 'financial-dashboard' %}">FINANCEIRO</a> / CONFIGURAÇÃO</div><h1>Chaves Pix</h1><p class="muted">Cadastre as chaves que geram o QR Code de dízimos e ofertas. Cada chave recebe em uma conta financeira.</p></div>{% if can_add %}<a class="button button-primary" href="{% url 'pix-key-create' %}">+ Nova chave Pix</a>{% endif %}</div>
+<section class="panel"><div class="table-wrap"><table><thead><tr><th>Identificação</th><th>Tipo</th><th>Chave</th><th>Recebedor</th><th>Conta</th><th>Situação</th><th></th></tr></thead><tbody>
+  {% for key in keys %}<tr>
+    <td>{{ key.label }}{% if key.is_default %}<span class="subline">Chave padrão</span>{% endif %}</td>
+    <td>{{ key.get_key_type_display }}</td><td>{{ key.masked_key }}</td>
+    <td>{{ key.receiver_name }} · {{ key.city }}</td><td>{{ key.account }}</td>
+    <td>{% if key.active %}Ativa{% else %}Inativa{% endif %}</td>
+    <td>{% if can_change %}<a class="text-link" href="{% url 'pix-key-update' key.pk %}">Editar</a>{% endif %}</td>
+  </tr>
+  {% empty %}<tr><td colspan="7">Nenhuma chave cadastrada. Enquanto isso, o sistema usa a chave configurada no servidor.</td></tr>{% endfor %}
+</tbody></table></div></section>
+{% endblock %}

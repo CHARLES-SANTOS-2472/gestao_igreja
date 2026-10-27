@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Maquininhas · Financeiro{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow"><a class="back-link" href="{% url 'financial-dashboard' %}">FINANCEIRO</a> / CONFIGURAÇÃO</div><h1>Maquininhas de cartão</h1><p class="muted">Cadastre as maquininhas e a conta que recebe os valores. Cada recebimento no cartão é registrado manualmente no lançamento.</p></div>{% if can_add %}<a class="button button-primary" href="{% url 'card-machine-create' %}">+ Nova maquininha</a>{% endif %}</div>
+<section class="panel"><div class="table-wrap"><table><thead><tr><th>Identificação</th><th>Operadora</th><th>Terminal</th><th>Conta</th><th>Situação</th><th></th></tr></thead><tbody>
+  {% for machine in machines %}<tr>
+    <td>{{ machine.name }}</td><td>{{ machine.provider|default:"—" }}</td><td>{{ machine.terminal_id|default:"—" }}</td>
+    <td>{{ machine.account }}</td><td>{% if machine.active %}Ativa{% else %}Inativa{% endif %}</td>
+    <td>{% if can_change %}<a class="text-link" href="{% url 'card-machine-update' machine.pk %}">Editar</a>{% endif %}</td>
+  </tr>
+  {% empty %}<tr><td colspan="6">Nenhuma maquininha cadastrada.</td></tr>{% endfor %}
+</tbody></table></div></section>
+{% endblock %}

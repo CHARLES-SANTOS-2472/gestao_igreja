@@ -47,3 +47,5 @@ Django 5.2, Python 3.10, SQLite, ReportLab (PDFs). Apps: `membros`, `eventos`, `
 - Proximos: QR Code Pix + dashboard financeiro, PDFs financeiros, backup/historico.
 
 - Pix: /financeiro/pix/ (QR + copia e cola, dizimo/oferta identificado em tag 62-05; config PIX_KEY/PIX_RECEIVER_NAME/PIX_CITY; botao Registrar recebimento pre-preenche lancamento). Dependencia qrcode.
+
+- Chaves Pix (/financeiro/chaves-pix/) e Maquininhas (/financeiro/maquininhas/): cadastro manual; Pix escolhe a chave e a conta; cartao credito/debito registrado manualmente via lancamento pre-preenchido (forma, conta, valor).

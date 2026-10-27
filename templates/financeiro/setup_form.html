@@ -10,6 +10,6 @@
     {% else %}<label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required">*</span>{% endif %}</label>{{ field }}{% endif %}
     {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
   </div>{% endfor %}</div>
-  <div class="form-actions"><a class="button button-secondary" href="{% url 'financial-dashboard' %}">Cancelar</a><button class="button button-primary" type="submit">Salvar</button></div>
+  <div class="form-actions"><a class="button button-secondary" href="{{ back_url|default:'/financeiro/' }}">Cancelar</a><button class="button button-primary" type="submit">Salvar</button></div>
 </form>
 {% endblock %}

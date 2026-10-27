@@ -8,6 +8,8 @@ from eventos.models import ChurchEvent
 from ministerios.models import Department
 
 from .models import (
+    CardMachine,
+    PixKey,
     DonationRecord,
     FinancialAccount,
     FinancialCategory,
@@ -389,6 +391,85 @@ class DonationRecordForm(forms.ModelForm):
                 "destination_description", "Descreva a finalidade da doação."
             )
         return cleaned_data
+
+
+class PixKeyForm(forms.ModelForm):
+    class Meta:
+        model = PixKey
+        fields = (
+            "label",
+            "account",
+            "key_type",
+            "key",
+            "receiver_name",
+            "city",
+            "is_default",
+            "active",
+        )
+        help_texts = {
+            "receiver_name": "Como aparece para quem paga (até 25 letras, sem acentos).",
+            "city": "Até 15 letras, sem acentos.",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["account"].queryset = FinancialAccount.objects.filter(
+            Q(active=True) | Q(pk=getattr(self.instance, "account_id", None))
+        )
+
+    def clean_key(self):
+        return self.cleaned_data["key"].strip()
+
+    def clean(self):
+        cleaned = super().clean()
+        key_type = cleaned.get("key_type")
+        key = cleaned.get("key", "")
+        if key_type and key:
+            digits = re.sub(r"\D", "", key)
+            if key_type in ("cnpj", "cpf"):
+                size = 14 if key_type == "cnpj" else 11
+                if len(digits) != size:
+                    self.add_error("key", f"Informe o {key_type.upper()} com {size} números.")
+                else:
+                    cleaned["key"] = digits
+            elif key_type == "phone":
+                number = digits[2:] if digits.startswith("55") and len(digits) > 11 else digits
+                if len(number) not in (10, 11):
+                    self.add_error("key", "Informe o celular com DDD.")
+                else:
+                    cleaned["key"] = f"+55{number}"
+            elif key_type == "email":
+                if "@" not in key or " " in key:
+                    self.add_error("key", "Informe um e-mail válido.")
+                else:
+                    cleaned["key"] = key.lower()
+            elif not re.fullmatch(r"[0-9a-fA-F-]{32,36}", key):
+                self.add_error("key", "A chave aleatória deve ter o formato de 32 caracteres (UUID).")
+        return cleaned
+
+    def clean_receiver_name(self):
+        return self.cleaned_data["receiver_name"].strip()
+
+    def _post_clean(self):
+        super()._post_clean()
+        key = self.cleaned_data.get("key")
+        if key:
+            self.instance.key = key
+        duplicate = PixKey.objects.filter(key=self.instance.key).exclude(pk=self.instance.pk)
+        if self.instance.key and duplicate.exists():
+            self.add_error("key", "Esta chave Pix já está cadastrada.")
+
+
+class CardMachineForm(forms.ModelForm):
+    class Meta:
+        model = CardMachine
+        fields = ("name", "provider", "terminal_id", "account", "active")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["account"].queryset = FinancialAccount.objects.filter(
+            Q(active=True) | Q(pk=getattr(self.instance, "account_id", None))
+        )
 
 
 class DonationCancellationForm(forms.Form):

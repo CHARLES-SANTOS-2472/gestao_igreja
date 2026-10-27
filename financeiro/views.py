@@ -10,12 +10,16 @@ from django.db import transaction
 from django.db.models import Count, DecimalField, ExpressionWrapper, F, Q, Sum, Value
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy
+from urllib.parse import urlencode
+
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, TemplateView, UpdateView
 
 from .forms import (
+    CardMachineForm,
+    PixKeyForm,
     DonationCancellationForm,
     DonationRecordForm,
     FinancialAccountForm,
@@ -26,6 +30,8 @@ from .forms import (
 )
 from .pix import build_pix_payload, qr_svg
 from .models import (
+    CardMachine,
+    PixKey,
     DonationRecord,
     FinancialAccount,
     FinancialCategory,
@@ -77,28 +83,148 @@ class PixContributionView(LoginRequiredMixin, PermissionRequiredMixin, TemplateV
                     amount = None
             except ArithmeticError:
                 amount = None
-        payload = build_pix_payload(
-            settings.PIX_KEY,
-            settings.PIX_RECEIVER_NAME,
-            settings.PIX_CITY,
-            amount=amount,
-            reference=reference,
+        keys = list(PixKey.objects.filter(active=True).select_related("account"))
+        selected = next(
+            (k for k in keys if str(k.pk) == self.request.GET.get("chave")),
+            next((k for k in keys if k.is_default), keys[0] if keys else None),
         )
+        if selected:
+            pix_args = (selected.key, selected.receiver_name, selected.city)
+        else:
+            pix_args = (settings.PIX_KEY, settings.PIX_RECEIVER_NAME, settings.PIX_CITY)
+        payload = build_pix_payload(*pix_args, amount=amount, reference=reference)
+        machines = list(CardMachine.objects.filter(active=True).select_related("account"))
+        machine = next(
+            (m for m in machines if str(m.pk) == self.request.GET.get("maquininha")),
+            machines[0] if machines else None,
+        )
+        category = FinancialCategory.objects.filter(
+            name=category_name, kind=FinancialCategory.Kind.INCOME
+        ).first()
+
+        def register_url(method, account, note):
+            if not category:
+                return ""
+            params = {
+                "categoria": category.pk,
+                "titulo": f"{label} ({note})",
+                "forma": method,
+            }
+            if account:
+                params["conta"] = account.pk
+            if amount:
+                params["valor"] = amount
+            return f"{reverse('financial-transaction-create')}?{urlencode(params)}"
+
         context.update(
             purpose=purpose,
             purpose_label=label,
             amount=amount,
             payload=payload,
             qr_svg=mark_safe(qr_svg(payload)),
-            category=FinancialCategory.objects.filter(
-                name=category_name, kind=FinancialCategory.Kind.INCOME
-            ).first(),
+            category=category,
+            pix_keys=keys,
+            selected_key=selected,
+            machines=machines,
+            machine=machine,
+            pix_register_url=register_url(
+                "pix", selected.account if selected else None, "Pix"
+            ),
+            credit_register_url=register_url(
+                "credit_card", machine.account if machine else None, "cartão de crédito"
+            ),
+            debit_register_url=register_url(
+                "debit_card", machine.account if machine else None, "cartão de débito"
+            ),
             can_add_transaction=self.request.user.has_perm(
                 "financeiro.add_financialtransaction"
             ),
         )
         return context
 
+
+class PixKeyListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = PixKey
+    template_name = "financeiro/pixkey_list.html"
+    context_object_name = "keys"
+    permission_required = "financeiro.view_pixkey"
+
+    def get_queryset(self):
+        return PixKey.objects.select_related("account")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["can_add"] = self.request.user.has_perm("financeiro.add_pixkey")
+        context["can_change"] = self.request.user.has_perm("financeiro.change_pixkey")
+        return context
+
+
+class PixKeyCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = PixKey
+    form_class = PixKeyForm
+    template_name = "financeiro/setup_form.html"
+    permission_required = "financeiro.add_pixkey"
+    extra_context = {"form_title": "Nova chave Pix", "back_url": reverse_lazy("pix-key-list")}
+    success_url = reverse_lazy("pix-key-list")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Chave Pix cadastrada.")
+        return super().form_valid(form)
+
+
+class PixKeyUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = PixKey
+    form_class = PixKeyForm
+    template_name = "financeiro/setup_form.html"
+    permission_required = "financeiro.change_pixkey"
+    extra_context = {"form_title": "Editar chave Pix", "back_url": reverse_lazy("pix-key-list")}
+    success_url = reverse_lazy("pix-key-list")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Chave Pix atualizada.")
+        return super().form_valid(form)
+
+
+class CardMachineListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = CardMachine
+    template_name = "financeiro/cardmachine_list.html"
+    context_object_name = "machines"
+    permission_required = "financeiro.view_cardmachine"
+
+    def get_queryset(self):
+        return CardMachine.objects.select_related("account")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["can_add"] = self.request.user.has_perm("financeiro.add_cardmachine")
+        context["can_change"] = self.request.user.has_perm("financeiro.change_cardmachine")
+        return context
+
+
+class CardMachineCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = CardMachine
+    form_class = CardMachineForm
+    template_name = "financeiro/setup_form.html"
+    permission_required = "financeiro.add_cardmachine"
+    extra_context = {"form_title": "Nova maquininha", "back_url": reverse_lazy("card-machine-list")}
+    success_url = reverse_lazy("card-machine-list")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Maquininha cadastrada.")
+        return super().form_valid(form)
+
+
+class CardMachineUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = CardMachine
+    form_class = CardMachineForm
+    template_name = "financeiro/setup_form.html"
+    permission_required = "financeiro.change_cardmachine"
+    extra_context = {"form_title": "Editar maquininha", "back_url": reverse_lazy("card-machine-list")}
+    success_url = reverse_lazy("card-machine-list")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Maquininha atualizada.")
+        return super().form_valid(form)
 
 class FinancialDashboardView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
     template_name = "financeiro/dashboard.html"
@@ -295,9 +421,23 @@ class FinancialTransactionCreateView(
                 category=category,
                 payment_method=FinancialTransaction.PaymentMethod.PIX,
             )
-            title = self.request.GET.get("titulo", "").strip()[:150]
+            title = self.request.GET.get("titulo", "").strip()[:160]
             if title:
                 initial["title"] = title
+            method = self.request.GET.get("forma", "")
+            if method in FinancialTransaction.PaymentMethod.values:
+                initial["payment_method"] = method
+            account = FinancialAccount.objects.filter(
+                pk=self.request.GET.get("conta", "").strip() or 0, active=True
+            ).first()
+            if account:
+                initial["account"] = account
+            try:
+                value = Decimal(self.request.GET.get("valor", ""))
+                if value > 0:
+                    initial["amount"] = value.quantize(Decimal("0.01"))
+            except ArithmeticError:
+                pass
         return initial
 
     @transaction.atomic

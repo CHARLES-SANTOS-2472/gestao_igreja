@@ -1,6 +1,8 @@
 from django.contrib import admin
 
 from .models import (
+    CardMachine,
+    PixKey,
     FinancialAccount,
     FinancialCategory,
     DonationRecord,
@@ -101,3 +103,13 @@ class DonationRecordAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(PixKey)
+class PixKeyAdmin(admin.ModelAdmin):
+    list_display = ('label', 'key_type', 'account', 'is_default', 'active')
+
+
+@admin.register(CardMachine)
+class CardMachineAdmin(admin.ModelAdmin):
+    list_display = ('name', 'provider', 'account', 'active')

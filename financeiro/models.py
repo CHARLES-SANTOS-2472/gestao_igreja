@@ -158,6 +158,73 @@ class FinancialAccount(models.Model):
         return f"••••{self.account_number[-4:]}"
 
 
+class PixKey(models.Model):
+    class KeyType(models.TextChoices):
+        CNPJ = "cnpj", "CNPJ"
+        CPF = "cpf", "CPF"
+        EMAIL = "email", "E-mail"
+        PHONE = "phone", "Celular"
+        RANDOM = "random", "Chave aleatória"
+
+    label = models.CharField("identificação", max_length=100)
+    account = models.ForeignKey(
+        FinancialAccount,
+        verbose_name="conta que recebe",
+        on_delete=models.PROTECT,
+        related_name="pix_keys",
+    )
+    key_type = models.CharField("tipo da chave", max_length=10, choices=KeyType.choices)
+    key = models.CharField("chave Pix", max_length=77, unique=True)
+    receiver_name = models.CharField("nome do recebedor", max_length=25)
+    city = models.CharField("cidade", max_length=15)
+    is_default = models.BooleanField("chave padrão", default=False)
+    active = models.BooleanField("ativa", default=True)
+    created_at = models.DateTimeField("cadastrada em", auto_now_add=True)
+
+    class Meta:
+        ordering = ["-is_default", "label"]
+        verbose_name = "chave Pix"
+        verbose_name_plural = "chaves Pix"
+
+    def __str__(self):
+        return self.label
+
+    @property
+    def masked_key(self):
+        if len(self.key) <= 6:
+            return self.key
+        return f"{self.key[:3]}…{self.key[-3:]}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.is_default:
+            PixKey.objects.exclude(pk=self.pk).filter(is_default=True).update(
+                is_default=False
+            )
+
+
+class CardMachine(models.Model):
+    name = models.CharField("identificação", max_length=100, unique=True)
+    provider = models.CharField("operadora / adquirente", max_length=60, blank=True)
+    terminal_id = models.CharField("número de série / terminal", max_length=60, blank=True)
+    account = models.ForeignKey(
+        FinancialAccount,
+        verbose_name="conta que recebe",
+        on_delete=models.PROTECT,
+        related_name="card_machines",
+    )
+    active = models.BooleanField("ativa", default=True)
+    created_at = models.DateTimeField("cadastrada em", auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "maquininha"
+        verbose_name_plural = "maquininhas"
+
+    def __str__(self):
+        return self.name
+
+
 class FinancialTransaction(models.Model):
     class Kind(models.TextChoices):
         INCOME = "income", "Receita"
@@ -166,6 +233,7 @@ class FinancialTransaction(models.Model):
     class PaymentMethod(models.TextChoices):
         PIX = "pix", "Pix"
         CREDIT_CARD = "credit_card", "Cartão de crédito"
+        DEBIT_CARD = "debit_card", "Cartão de débito"
         CASH = "cash", "Dinheiro"
         BANK_TRANSFER = "bank_transfer", "Transferência bancária"
         OTHER = "other", "Outro"
