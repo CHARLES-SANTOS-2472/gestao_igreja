@@ -4,7 +4,7 @@
 <section class="overview-hero" aria-label="Mensagem de boas-vindas">
   <div class="overview-welcome">
     <div class="eyebrow">PAINEL ADMINISTRATIVO</div>
-    <h1>Que bom ter você por aqui{% if user.first_name %}, {{ user.first_name }}{% endif %}.</h1>
+    <h1>Que bom ter você por aqui{% if user.get_full_name %}, {{ user.get_full_name }}{% endif %}.</h1>
     <p>Uma visão simples dos principais espaços da igreja. Escolha um módulo para continuar.</p>
     <div class="overview-message-slot">
       <span class="overview-message-mark" aria-hidden="true">“</span>

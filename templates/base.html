@@ -16,7 +16,7 @@
     </a>
     {% if user.is_authenticated %}
     <div class="user-menu">
-      <span class="user-name">{{ user.get_short_name|default:user.username }}</span>
+      <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
       <a class="text-link user-link" href="{% url 'profile' %}">Minha conta</a>
       <a class="text-link user-link" href="{% url 'password-change' %}">Alterar senha</a>
       <form method="post" action="{% url 'logout' %}">
