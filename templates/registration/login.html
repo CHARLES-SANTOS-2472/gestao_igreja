@@ -16,6 +16,7 @@
       {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
       <button class="button button-primary button-wide" type="submit">Entrar</button>
     </form>
+    <p class="privacy-note"><a class="text-link" href="{% url 'password_reset' %}">Esqueci minha senha</a></p>
     <p class="privacy-note">Os dados cadastrados são restritos. Use apenas em dispositivo confiável.</p>
   </div>
 </section>

@@ -68,3 +68,7 @@ Usuários são desativados, não excluídos. Cada pessoa troca a própria senha 
 Este projeto é um início de desenvolvimento, não uma instalação pronta para produção. Dados como CPF, contatos e informações familiares são pessoais. Configure HTTPS, uma chave `DJANGO_SECRET_KEY` forte fora do código, `DJANGO_DEBUG=0`, hosts permitidos, PostgreSQL, backups criptografados, controle de acesso por função, política de retenção e procedimentos de resposta a incidentes. Restrinja dados pastorais e financeiros em módulos próprios antes de implementá-los. Avalie a LGPD, a base legal e os avisos de privacidade com orientação adequada.
 
 Para produção, defina `DJANGO_ALLOWED_HOSTS` como uma lista separada por vírgulas de domínios confiáveis. Não publique o banco SQLite de desenvolvimento nem use credenciais reais de membros em testes.
+
+## Recuperação de senha
+
+Na tela de login, **Esqueci minha senha** envia um link (válido por 1 hora) ao e-mail cadastrado no usuário. Sem SMTP configurado, o e-mail é exibido no terminal do servidor. Para envio real, defina EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend, EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD e DEFAULT_FROM_EMAIL.

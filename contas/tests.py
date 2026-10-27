@@ -131,3 +131,43 @@ class UserManagementTests(TestCase):
         self.assertNotContains(
             self.client.get(reverse("dashboard")), f'href="{reverse("user-list")}"'
         )
+
+
+class PasswordRecoveryTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            "ana", email="ana@example.com", password=PASSWORD
+        )
+
+    def test_login_links_to_recovery(self):
+        self.assertContains(self.client.get(reverse("login")), reverse("password_reset"))
+
+    def test_full_recovery_flow(self):
+        from django.core import mail
+
+        response = self.client.post(reverse("password_reset"), {"email": "ana@example.com"})
+        self.assertRedirects(response, reverse("password_reset_done"))
+        self.assertEqual(len(mail.outbox), 1)
+        link = next(l for l in mail.outbox[0].body.splitlines() if "/senha/nova/" in l)
+        path = "/" + link.split("/", 3)[3]
+        page = self.client.get(path, follow=True)
+        new = "Nova-Senha-4421!"
+        response = self.client.post(page.request["PATH_INFO"], {"new_password1": new, "new_password2": new})
+        self.assertRedirects(response, reverse("password_reset_complete"))
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(new))
+
+    def test_unknown_email_gives_same_response_without_sending(self):
+        from django.core import mail
+
+        response = self.client.post(reverse("password_reset"), {"email": "x@example.com"})
+        self.assertRedirects(response, reverse("password_reset_done"))
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_inactive_user_gets_no_email(self):
+        from django.core import mail
+
+        self.user.is_active = False
+        self.user.save()
+        self.client.post(reverse("password_reset"), {"email": "ana@example.com"})
+        self.assertEqual(len(mail.outbox), 0)
