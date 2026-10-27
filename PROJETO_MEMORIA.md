@@ -40,3 +40,8 @@ Django 5.2, Python 3.10, SQLite, ReportLab (PDFs). Apps: `membros`, `eventos`, `
 - PDFs dos demais relatórios (financeiro, presenças, membros).
 - Estoque e distribuição de bens doados (decisão futura).
 - Backup e portal do membro.
+
+## Usuarios e GitHub
+- App contas: Super admin, Administrador (grupo, so super admin cria) e Usuario comum (permissoes por modulo). Rota /usuarios/. 155 testes OK.
+- Repositorio privado: https://github.com/CHARLES-SANTOS-2472/gestao_igreja (branch main, raiz = pasta gestao_igreja).
+- Proximos: QR Code Pix + dashboard financeiro, PDFs financeiros, backup/historico.
