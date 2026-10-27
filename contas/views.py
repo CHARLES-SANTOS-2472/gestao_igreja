@@ -6,7 +6,7 @@ from django.contrib.auth.views import PasswordChangeView
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView, TemplateView, UpdateView
 
 from .access import ADMIN_GROUP_NAME, can_manage_users, is_administrator
 from .forms import ManagedUserForm
@@ -134,6 +134,24 @@ class UserToggleActiveView(UserManagerMixin, View):
         state = "ativado" if user.is_active else "desativado"
         messages.success(request, f"Usuário {user.username} {state}.")
         return redirect("user-list")
+
+
+class OwnProfileView(LoginRequiredMixin, UpdateView):
+    template_name = "contas/profile.html"
+    fields = ("first_name", "last_name", "email")
+    success_url = reverse_lazy("profile")
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields["email"].required = True
+        return form
+
+    def form_valid(self, form):
+        messages.success(self.request, "Seus dados foram atualizados.")
+        return super().form_valid(form)
 
 
 class OwnPasswordChangeView(LoginRequiredMixin, PasswordChangeView):

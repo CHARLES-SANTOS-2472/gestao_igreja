@@ -1,4 +1,4 @@
-# Gestão da Igreja
+﻿# Gestão da Igreja
 
 Sistema web responsivo para computador e celular. Esta versão contém acesso autenticado, painel administrativo, cadastro pesquisável de membros, congregados, visitantes e novos convertidos, e gestão básica de cultos e eventos.
 
@@ -71,4 +71,5 @@ Para produção, defina `DJANGO_ALLOWED_HOSTS` como uma lista separada por vírg
 
 ## Recuperação de senha
 
-Na tela de login, **Esqueci minha senha** envia um link (válido por 1 hora) ao e-mail cadastrado no usuário. Sem SMTP configurado, o e-mail é exibido no terminal do servidor. Para envio real, defina EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend, EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD e DEFAULT_FROM_EMAIL.
+Na tela de login, **Esqueci minha senha** envia um link (válido por 5 minutos) ao e-mail cadastrado no usuário. Sem SMTP configurado, o e-mail é exibido apenas no terminal do servidor. Para envio real, copie `.env.example` para `.env` (ignorado pelo Git) e preencha, ou defina EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend, EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD e DEFAULT_FROM_EMAIL.
+

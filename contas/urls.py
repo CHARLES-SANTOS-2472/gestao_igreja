@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     OwnPasswordChangeView,
+    OwnProfileView,
     UserCreateView,
     UserListView,
     UserPasswordResetView,
@@ -16,4 +17,5 @@ urlpatterns = [
     path("<int:pk>/senha/", UserPasswordResetView.as_view(), name="user-password-reset"),
     path("<int:pk>/situacao/", UserToggleActiveView.as_view(), name="user-toggle-active"),
     path("minha-senha/", OwnPasswordChangeView.as_view(), name="password-change"),
+    path("minha-conta/", OwnProfileView.as_view(), name="profile"),
 ]

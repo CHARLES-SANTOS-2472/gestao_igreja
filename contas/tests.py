@@ -171,3 +171,28 @@ class PasswordRecoveryTests(TestCase):
         self.user.save()
         self.client.post(reverse("password_reset"), {"email": "ana@example.com"})
         self.assertEqual(len(mail.outbox), 0)
+
+
+class ProfileAndTimeoutTests(TestCase):
+    def test_reset_timeout_is_five_minutes(self):
+        from django.conf import settings
+
+        self.assertEqual(settings.PASSWORD_RESET_TIMEOUT, 300)
+
+    def test_superuser_edits_own_name_and_email(self):
+        user = User.objects.create_superuser("root", "a@b.com", PASSWORD)
+        self.client.force_login(user)
+        response = self.client.post(
+            reverse("profile"),
+            {"first_name": "Charles", "last_name": "Santos", "email": "novo@example.com"},
+        )
+        self.assertRedirects(response, reverse("profile"))
+        user.refresh_from_db()
+        self.assertEqual((user.first_name, user.email), ("Charles", "novo@example.com"))
+        self.assertTrue(user.is_superuser)
+
+    def test_profile_requires_email(self):
+        user = User.objects.create_user("u", password=PASSWORD)
+        self.client.force_login(user)
+        response = self.client.post(reverse("profile"), {"first_name": "A", "email": ""})
+        self.assertEqual(response.status_code, 200)
