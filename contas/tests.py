@@ -196,3 +196,13 @@ class ProfileAndTimeoutTests(TestCase):
         self.client.force_login(user)
         response = self.client.post(reverse("profile"), {"first_name": "A", "email": ""})
         self.assertEqual(response.status_code, 200)
+
+
+class LoginLockoutTests(TestCase):
+    def test_account_is_locked_after_repeated_failures(self):
+        User.objects.create_user("alvo", password=PASSWORD)
+        for _ in range(5):
+            self.client.post(reverse("login"), {"username": "alvo", "password": "errada"})
+        response = self.client.post(reverse("login"), {"username": "alvo", "password": PASSWORD})
+        self.assertEqual(response.status_code, 429)
+        self.assertContains(response, "Muitas tentativas", status_code=429)

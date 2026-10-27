@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Acesso bloqueado · Gestão da Igreja{% endblock %}
+{% block content %}
+<section class="login-wrap"><div class="login-card">
+  <div class="eyebrow">ACESSO BLOQUEADO</div>
+  <h1>Muitas tentativas</h1>
+  <p class="muted">Por segurança, o acesso foi bloqueado temporariamente após várias tentativas de login sem sucesso. Aguarde 15 minutos e tente novamente.</p>
+  <p class="privacy-note"><a class="text-link" href="{% url 'password_reset' %}">Esqueci minha senha</a></p>
+</div></section>
+{% endblock %}
