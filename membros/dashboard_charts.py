@@ -378,4 +378,6 @@ def build_charts(user):
             }
         )
 
+    order = {"ME": 0, "AG": 1, "DZ": 2}
+    charts.sort(key=lambda chart: order.get(chart["code"], 3))
     return charts

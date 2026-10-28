@@ -25,8 +25,8 @@
   </div>
   <div class="chart-grid">
     {% for chart in charts %}
-    <article class="chart-card {% cycle 'chart-green' 'chart-gold' %}{% if chart.code not in 'ME DZ AG' %} is-collapsed{% endif %}" data-chart-card>
-      <header class="chart-head" role="button" tabindex="0" aria-expanded="{% if chart.code in 'ME DZ AG' %}true{% else %}false{% endif %}" title="Clique para abrir ou recolher">
+    <article class="chart-card {% cycle 'chart-green' 'chart-gold' %}{% if chart.code != 'ME' and chart.code != 'AG' and chart.code != 'DZ' %} is-collapsed{% endif %}" data-chart-card>
+      <header class="chart-head" role="button" tabindex="0" aria-expanded="{% if chart.code == 'ME' or chart.code == 'AG' or chart.code == 'DZ' %}true{% else %}false{% endif %}" title="Clique para abrir ou recolher">
         <span class="chart-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" focusable="false">
             {% if chart.code == "ME" %}

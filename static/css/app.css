@@ -151,10 +151,19 @@ h3 { margin-bottom: 7px; font-size: 17px; }
 .chart-body { display: flex; flex-direction: column; gap: 14px; }
 .chart-chevron { width: 9px; height: 9px; flex: none; border-right: 2px solid #7a8d85; border-bottom: 2px solid #7a8d85; transform: rotate(45deg); transition: transform .2s ease; }
 .chart-card.is-collapsed .chart-chevron { transform: rotate(-45deg); }
-.chart-card.is-collapsed { gap: 0; padding-block: 14px; }
+.chart-card.is-collapsed { height: 126px; min-height: 126px; gap: 0; padding: 14px 18px; }
 .chart-card.is-collapsed .chart-body { display: none; }
-@media (max-width: 1000px) { .chart-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 640px) { .chart-grid { grid-template-columns: 1fr; } .viz-split { grid-template-columns: 110px minmax(0, 1fr); } .donut { width: 110px; height: 110px; } }
+.chart-card.is-collapsed .chart-head { display: grid; grid-template-columns: 40px minmax(0, 1fr) 10px; grid-template-rows: auto auto auto; align-content: center; column-gap: 11px; row-gap: 5px; }
+.chart-card.is-collapsed .chart-icon { grid-column: 1; grid-row: 1 / span 3; }
+.chart-card.is-collapsed .chart-head > div:nth-child(2) { display: contents; }
+.chart-card.is-collapsed .chart-head h3 { grid-column: 2; grid-row: 1; }
+.chart-card.is-collapsed .chart-head > div:nth-child(2) small { grid-column: 2; grid-row: 2; }
+.chart-card.is-collapsed .chart-total { display: flex; grid-column: 2; grid-row: 3; align-items: baseline; justify-items: start; gap: 5px; text-align: left; }
+.chart-card.is-collapsed .chart-total strong { font-size: 16px; }
+.chart-card.is-collapsed .chart-total small { max-width: 100%; }
+.chart-card.is-collapsed .chart-chevron { grid-column: 3; grid-row: 1; }
+@media (max-width: 1000px) { .chart-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .chart-card.is-collapsed { height: 126px; min-height: 126px; } }
+@media (max-width: 640px) { .chart-grid { grid-template-columns: 1fr; } .chart-card.is-collapsed { height: 112px; min-height: 112px; } .viz-split { grid-template-columns: 110px minmax(0, 1fr); } .donut { width: 110px; height: 110px; } }
 .stat-card-link { color: inherit; text-decoration: none; transition: border-color .15s ease, transform .15s ease; }
 .stat-card-link:hover { border-color: #b6a477; box-shadow: 0 9px 24px #193a3018; transform: translateY(-2px); }
 .stat-card-link:focus-visible { outline: 3px solid #dcebe4; outline-offset: 2px; }
