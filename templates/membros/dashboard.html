@@ -5,7 +5,7 @@
   <div class="overview-welcome">
     <div class="eyebrow">PAINEL ADMINISTRATIVO</div>
     <h1>Que bom ter você por aqui{% if user.get_full_name %}, {{ user.get_full_name }}{% endif %}.</h1>
-    <p>Uma visão simples dos principais espaços da igreja. Escolha um módulo para continuar.</p>
+    <p>Indicadores de todos os módulos em um só lugar. Use os botões dos gráficos para entrar em cada área.</p>
     <div class="overview-message-slot">
       <span class="overview-message-mark" aria-hidden="true">“</span>
       <div><strong>Mensagem da igreja</strong><span>Este espaço poderá receber avisos, versículos e mensagens especiais.</span></div>
@@ -18,20 +18,44 @@
   </div>
 </section>
 
-<section class="overview-section" aria-labelledby="overview-modules-title">
+<section class="overview-section" aria-labelledby="overview-charts-title">
   <div class="overview-section-heading">
-    <div><div class="eyebrow">ACESSO RÁPIDO</div><h2 id="overview-modules-title">Seus módulos</h2></div>
-    <span class="overview-section-note">Os atalhos respeitam suas permissões</span>
+    <div><div class="eyebrow">PAINEL DE INDICADORES</div><h2 id="overview-charts-title">Visão geral da igreja</h2></div>
+    <span class="overview-section-note">Clique em uma barra ou no botão para abrir o módulo</span>
   </div>
-  <div class="overview-grid">
-    {% for card in dashboard_cards %}
-    <a class="overview-card" href="{{ card.url }}">
-      <span class="overview-card-code" aria-hidden="true">{{ card.code }}</span>
-      <span class="overview-card-arrow" aria-hidden="true">↗</span>
-      <strong>{{ card.title }}</strong>
-      <span class="overview-card-description">{{ card.description }}</span>
-      <span class="overview-card-count">{{ card.count }}</span>
-    </a>
+  <div class="chart-grid">
+    {% for chart in charts %}
+    <article class="chart-card {% cycle 'chart-green' 'chart-gold' %}">
+      <header class="chart-head">
+        <span class="chart-code" aria-hidden="true">{{ chart.code }}</span>
+        <div><h3>{{ chart.title }}</h3><small>{{ chart.subtitle }}</small></div>
+        <div class="chart-total"><strong>{{ chart.total }}</strong><small>{{ chart.total_label }}</small></div>
+      </header>
+      {% if chart.kind == "bars" %}
+      <div class="hbar-list">
+        {% for row in chart.rows %}
+        <a class="hbar-row" href="{{ row.url }}" title="{{ row.label }}: {{ row.value }}">
+          <span class="hbar-label">{{ row.label }}</span>
+          <span class="hbar-track"><span class="hbar-fill" style="width: {{ row.percent }}%"></span></span>
+          <span class="hbar-value">{{ row.value }}</span>
+        </a>
+        {% empty %}<div class="empty-compact">Sem dados ainda.</div>{% endfor %}
+      </div>
+      {% else %}
+      <div class="col-chart">
+        {% for group in chart.chart.groups %}
+        <a class="col-group" href="{{ chart.url }}">
+          <span class="col-bars">
+            {% for bar in group.bars %}<span class="col-bar {{ bar.css }}" style="height: {{ bar.percent }}%" title="{{ bar.name }}: {% if chart.chart.money %}R$ {{ bar.value|floatformat:2 }}{% else %}{{ bar.value }}{% endif %}"></span>{% endfor %}
+          </span>
+          <span class="col-label">{{ group.label }}</span>
+        </a>
+        {% endfor %}
+      </div>
+      <div class="chart-legend">{% for item in chart.chart.legend %}<span><i class="{{ item.css }}"></i>{{ item.name }}</span>{% endfor %}</div>
+      {% endif %}
+      <a class="chart-button" href="{{ chart.url }}">{{ chart.button }} →</a>
+    </article>
     {% empty %}
     <div class="empty-compact">Nenhum módulo está disponível para seu usuário.</div>
     {% endfor %}

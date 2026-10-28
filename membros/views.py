@@ -15,6 +15,7 @@ from financeiro.models import DonationRecord, FinancialTransaction
 from ministerios.models import Department
 from patrimonio.models import AdministrativeTask, ChurchAsset
 
+from .dashboard_charts import build_charts
 from .forms import MemberForm
 from .models import CboOccupation, Member
 
@@ -227,6 +228,7 @@ class DashboardView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
             )
 
         context["dashboard_cards"] = cards
+        context["charts"] = build_charts(user)
         context["upcoming_events"] = upcoming_events
         return context
 

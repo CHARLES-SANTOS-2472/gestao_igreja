@@ -652,18 +652,31 @@ class MemberManagementTests(TestCase):
             with self.subTest(url=url):
                 self.assertEqual(self.client.get(url).status_code, 403)
 
-    def test_dashboard_is_a_module_hub_without_recent_member_records(self):
+    def test_dashboard_shows_charts_without_recent_member_records(self):
         Member.objects.create(first_name="Pessoa Reservada")
 
         response = self.client.get(reverse("dashboard"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Seus módulos")
-        self.assertContains(response, "Membros e congregados")
+        self.assertContains(response, "Visão geral da igreja")
+        self.assertContains(response, "Abrir cadastro de pessoas")
+        self.assertContains(response, reverse("member-list"))
         self.assertContains(response, "Mensagem da igreja")
         self.assertContains(response, "Imagem da igreja")
         self.assertNotContains(response, "Cadastros recentes")
         self.assertNotContains(response, "Pessoa Reservada")
+
+    def test_dashboard_renders_every_chart_for_superuser(self):
+        admin = get_user_model().objects.create_superuser("root", "r@x.com", "SenhaForte#2026")
+        self.client.force_login(admin)
+        Member.objects.create(first_name="Ana", status=Member.Status.MEMBER)
+
+        response = self.client.get(reverse("dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["charts"]), 9)
+        for label in ("Abrir agenda", "Abrir financeiro", "Abrir doações", "Abrir patrimônio", "Abrir assistência"):
+            self.assertContains(response, label)
 
     def test_dashboard_shows_only_modules_available_to_the_user(self):
         user = get_user_model().objects.create_user(username="tesoureiro")
@@ -677,9 +690,9 @@ class MemberManagementTests(TestCase):
         response = self.client.get(reverse("dashboard"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Financeiro")
-        self.assertNotContains(response, "Membros e congregados")
-        self.assertNotContains(response, "Doações")
+        self.assertContains(response, "Abrir financeiro")
+        self.assertNotContains(response, "Abrir cadastro de pessoas")
+        self.assertNotContains(response, "Abrir doações")
 
     def test_member_form_prevents_self_as_spouse(self):
         member = Member.objects.create(first_name="Bia")
