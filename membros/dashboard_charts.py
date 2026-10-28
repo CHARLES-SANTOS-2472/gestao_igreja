@@ -31,6 +31,39 @@ def _bars(rows):
     return rows
 
 
+PALETTE = ("#2f7d6b", "#d0a64f", "#5fb3a1", "#8a6d3b", "#9fd3c5", "#e3cd98")
+
+
+def _with_colors(rows):
+    for index, row in enumerate(rows):
+        row["color"] = PALETTE[index % len(PALETTE)]
+    return rows
+
+
+def _pct(part, total):
+    return round(part * 100 / total) if total else 0
+
+
+def _donut(rows):
+    # Segmentos em um círculo de perímetro 100 (pathLength), com pequena folga entre fatias.
+    _with_colors(rows)
+    total = sum(row["value"] for row in rows)
+    filled = sum(1 for row in rows if row["value"])
+    gap = 0.8 if filled > 1 else 0
+    start = 0.0
+    segments = []
+    for row in rows:
+        share = row["value"] * 100 / total if total else 0
+        row["pct"] = round(share)
+        if row["value"]:
+            dash = round(max(share - gap, 0.3), 2)
+            segments.append(
+                {**row, "dash": dash, "rest": round(100 - dash, 2), "offset": round(-start, 2)}
+            )
+            start += share
+    return segments
+
+
 def _by_choice(queryset, field, choices, url, only=None):
     counts = {
         item[field]: item["total"]
@@ -84,8 +117,9 @@ def build_charts(user):
                 "code": "ME",
                 "title": "Pessoas",
                 "subtitle": "Membros, congregados e visitantes",
-                "kind": "bars",
+                "kind": "donut",
                 "rows": rows,
+                "segments": _donut(rows),
                 "total": sum(r["value"] for r in rows),
                 "total_label": "cadastros",
                 "url": reverse("member-list"),
@@ -132,8 +166,13 @@ def build_charts(user):
                 "code": "RE",
                 "title": "Reservas de espaços",
                 "subtitle": "Reservas futuras por situação",
-                "kind": "bars",
-                "rows": rows,
+                "kind": "gauge",
+                "rows": _with_colors(rows),
+                "pct": _pct(
+                    next((r["value"] for r in rows if r["label"] == SpaceReservation.Status.RESERVED.label), 0),
+                    sum(r["value"] for r in rows),
+                ),
+                "gauge_caption": "confirmadas",
                 "total": sum(r["value"] for r in rows),
                 "total_label": "reservas",
                 "url": reverse("reservation-list"),
@@ -239,8 +278,9 @@ def build_charts(user):
                 "code": "PA",
                 "title": "Patrimônio",
                 "subtitle": "Bens por situação",
-                "kind": "bars",
+                "kind": "donut",
                 "rows": rows,
+                "segments": _donut(rows),
                 "total": sum(r["value"] for r in rows),
                 "total_label": "bens",
                 "url": reverse("asset-list"),
@@ -260,8 +300,13 @@ def build_charts(user):
                 "code": "TA",
                 "title": "Tarefas",
                 "subtitle": "Demandas por situação",
-                "kind": "bars",
-                "rows": rows,
+                "kind": "ring",
+                "rows": _with_colors(rows),
+                "pct": _pct(
+                    next((r["value"] for r in rows if r["label"] == AdministrativeTask.Status.COMPLETED.label), 0),
+                    sum(r["value"] for r in rows),
+                ),
+                "gauge_caption": "concluídas",
                 "total": sum(r["value"] for r in rows),
                 "total_label": "tarefas",
                 "url": reverse("task-list"),
@@ -282,8 +327,10 @@ def build_charts(user):
                 "code": "AS",
                 "title": "Assistência social",
                 "subtitle": "Famílias atendidas",
-                "kind": "bars",
-                "rows": rows,
+                "kind": "gauge",
+                "rows": _with_colors(rows),
+                "pct": _pct(rows[0]["value"], sum(r["value"] for r in rows)),
+                "gauge_caption": "em acompanhamento",
                 "total": sum(r["value"] for r in rows),
                 "total_label": "famílias",
                 "url": reverse("assisted-family-list"),
