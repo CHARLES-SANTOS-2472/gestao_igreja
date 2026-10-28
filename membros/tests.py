@@ -675,6 +675,9 @@ class MemberManagementTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context["charts"]), 10)
+        self.assertEqual([chart["code"] for chart in response.context["charts"][:3]], ["ME", "AG", "DZ"])
+        self.assertContains(response, "chart-featured")
+        self.assertContains(response, "chart-side-card")
         for label in ("Abrir agenda", "Abrir financeiro", "Abrir doações", "Abrir patrimônio", "Abrir assistência"):
             self.assertContains(response, label)
 
