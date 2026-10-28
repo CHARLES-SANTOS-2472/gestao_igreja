@@ -65,8 +65,8 @@
       {% for error in form.is_placeholder.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
     </div>{% endif %}
   </section>
-  <section class="form-section"><h2>Preferências de contato</h2><p class="muted">Registre autorização antes de qualquer comunicação. Nenhuma mensagem é enviada automaticamente nesta versão.</p>
-    <div class="check-grid">{% for field in form %}{% if field.name == "email_consent" or field.name == "whatsapp_consent" %}<label class="check-field">{{ field }}<span>{{ field.label }}</span>{% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</label>{% endif %}{% endfor %}</div>
+  <section class="form-section"><h2>Preferências de contato</h2><p class="muted">Registre cada autorização separadamente. Mensagens diárias exigem autorização específica e podem ser interrompidas desmarcando a opção.</p>
+    <div class="check-grid">{% for field in form %}{% if field.name == "email_consent" or field.name == "whatsapp_consent" or field.name == "whatsapp_daily_consent" %}<label class="check-field">{{ field }}<span>{{ field.label }}</span>{% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</label>{% endif %}{% endfor %}</div>
   </section>
   <div class="form-actions"><a class="button button-secondary" href="{% if object %}{% url 'member-detail' object.pk %}{% else %}{{ person_list_url }}{% endif %}">Cancelar</a><button class="button button-primary" type="submit">Salvar cadastro</button></div>
 </form>

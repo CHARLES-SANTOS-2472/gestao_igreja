@@ -1,6 +1,9 @@
+from datetime import date
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Q
+from django.utils import timezone
 
 
 class CboOccupation(models.Model):
@@ -14,6 +17,47 @@ class CboOccupation(models.Model):
 
     def __str__(self):
         return f"{self.code} — {self.title}"
+
+
+class MessageOccasion(models.Model):
+    name = models.CharField("ocasião", max_length=100)
+    month = models.PositiveSmallIntegerField("mês")
+    day = models.PositiveSmallIntegerField("dia")
+    ai_guidance = models.TextField(
+        "orientação para a mensagem", blank=True,
+        help_text="Contexto opcional para a IA criar a mensagem desta ocasião.",
+    )
+    whatsapp_template_name = models.CharField(
+        "modelo aprovado no WhatsApp", max_length=100, blank=True
+    )
+    active = models.BooleanField("ativa", default=True)
+    created_at = models.DateTimeField("criada em", auto_now_add=True)
+    updated_at = models.DateTimeField("atualizada em", auto_now=True)
+
+    class Meta:
+        ordering = ["month", "day", "name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "month", "day"],
+                name="unique_message_occasion_per_date",
+            ),
+            models.CheckConstraint(
+                condition=Q(month__gte=1, month__lte=12, day__gte=1, day__lte=31),
+                name="message_occasion_month_day_range",
+            ),
+        ]
+        verbose_name = "ocasião de mensagem"
+        verbose_name_plural = "ocasiões de mensagens"
+
+    def clean(self):
+        super().clean()
+        try:
+            date(2000, self.month, self.day)
+        except (TypeError, ValueError):
+            raise ValidationError({"day": "Informe um dia válido para o mês escolhido."})
+
+    def __str__(self):
+        return f"{self.name} ({self.day:02d}/{self.month:02d})"
 
 
 class Member(models.Model):
@@ -80,6 +124,21 @@ class Member(models.Model):
     )
     email_consent = models.BooleanField("autorizou contato por e-mail", default=False)
     whatsapp_consent = models.BooleanField("autorizou contato por WhatsApp", default=False)
+    whatsapp_consent_at = models.DateTimeField(
+        "autorização para contato por WhatsApp registrada em", null=True, blank=True
+    )
+    whatsapp_revoked_at = models.DateTimeField(
+        "autorização para contato por WhatsApp revogada em", null=True, blank=True
+    )
+    whatsapp_daily_consent = models.BooleanField(
+        "autorizou mensagens diárias por WhatsApp", default=False
+    )
+    whatsapp_daily_consent_at = models.DateTimeField(
+        "autorização para mensagens diárias registrada em", null=True, blank=True
+    )
+    whatsapp_daily_revoked_at = models.DateTimeField(
+        "autorização para mensagens diárias revogada em", null=True, blank=True
+    )
     created_at = models.DateTimeField("cadastrado em", auto_now_add=True)
     updated_at = models.DateTimeField("atualizado em", auto_now=True)
 
@@ -90,12 +149,63 @@ class Member(models.Model):
         permissions = [
             ("view_pastoral_member_data", "Pode acessar dados pastorais restritos"),
         ]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(whatsapp_daily_consent=False) | Q(whatsapp_consent=True),
+                name="daily_whatsapp_requires_contact_consent",
+            ),
+        ]
 
     def __str__(self):
         full_name = f"{self.first_name} {self.last_name}".strip()
         if self.is_placeholder:
             return f"{full_name} (cadastro incompleto)"
         return full_name
+
+    def clean(self):
+        super().clean()
+        if self.whatsapp_daily_consent and not self.whatsapp_consent:
+            raise ValidationError(
+                {"whatsapp_daily_consent": "Autorize também o contato geral por WhatsApp."}
+            )
+        if self.whatsapp_daily_consent and not self.mobile.strip():
+            raise ValidationError(
+                {"whatsapp_daily_consent": "Informe um celular antes de autorizar mensagens diárias."}
+            )
+
+    def save(self, *args, **kwargs):
+        update_fields = kwargs.get("update_fields")
+        changed_fields = set(update_fields or ())
+        consent_fields = ("whatsapp_consent", "whatsapp_daily_consent")
+        previous = {}
+        if self.pk:
+            previous = (
+                type(self).objects.filter(pk=self.pk).values(*consent_fields).first() or {}
+            )
+
+        for field, stamp, revoked in (
+            ("whatsapp_consent", "whatsapp_consent_at", "whatsapp_revoked_at"),
+            (
+                "whatsapp_daily_consent",
+                "whatsapp_daily_consent_at",
+                "whatsapp_daily_revoked_at",
+            ),
+        ):
+            if update_fields is not None and field not in update_fields:
+                continue
+            old_value = previous.get(field, False)
+            new_value = getattr(self, field)
+            if new_value == old_value:
+                continue
+            if new_value:
+                setattr(self, stamp, timezone.now())
+                setattr(self, revoked, None)
+            elif old_value:
+                setattr(self, revoked, timezone.now())
+            changed_fields.update((stamp, revoked))
+        if update_fields is not None:
+            kwargs["update_fields"] = changed_fields
+        super().save(*args, **kwargs)
 
     @property
     def full_address(self):

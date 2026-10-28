@@ -2,13 +2,14 @@ from io import StringIO
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
+from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 from datetime import date
 
-from .models import CboOccupation, FamilyRelationship, Member
+from .models import CboOccupation, FamilyRelationship, Member, MessageOccasion
 
 
 class MemberManagementTests(TestCase):
@@ -41,6 +42,68 @@ class MemberManagementTests(TestCase):
         self.assertEqual(child.parents.get(), parent)
         self.assertTrue(child.email_consent)
         self.assertEqual(FamilyRelationship.objects.count(), 1)
+
+    def test_daily_whatsapp_consent_requires_general_consent_and_mobile(self):
+        response = self.client.post(
+            reverse("member-create"),
+            {
+                "first_name": "Joana",
+                "status": Member.Status.MEMBER,
+                "whatsapp_daily_consent": "on",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Member.objects.filter(first_name="Joana").exists())
+        self.assertContains(response, "autorização geral para contato por WhatsApp")
+
+    def test_daily_whatsapp_consent_records_timestamp(self):
+        response = self.client.post(
+            reverse("member-create"),
+            {
+                "first_name": "Joana",
+                "status": Member.Status.MEMBER,
+                "mobile": "11999999999",
+                "whatsapp_consent": "on",
+                "whatsapp_daily_consent": "on",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        member = Member.objects.get(first_name="Joana")
+        self.assertTrue(member.whatsapp_daily_consent)
+        self.assertIsNotNone(member.whatsapp_consent_at)
+        self.assertIsNotNone(member.whatsapp_daily_consent_at)
+        self.assertIsNone(member.whatsapp_revoked_at)
+        self.assertIsNone(member.whatsapp_daily_revoked_at)
+
+    def test_revoking_whatsapp_preferences_records_timestamps(self):
+        member = Member.objects.create(
+            first_name="Joana",
+            mobile="11999999999",
+            whatsapp_consent=True,
+            whatsapp_daily_consent=True,
+        )
+        member.whatsapp_daily_consent = False
+        member.whatsapp_consent = False
+        member.save(update_fields=("whatsapp_daily_consent", "whatsapp_consent"))
+        member.refresh_from_db()
+
+        self.assertIsNotNone(member.whatsapp_revoked_at)
+        self.assertIsNotNone(member.whatsapp_daily_revoked_at)
+
+    def test_message_occasion_accepts_valid_recurring_date(self):
+        occasion = MessageOccasion(name="Dia dos Pais", month=8, day=9)
+        occasion.full_clean()
+        occasion.save()
+
+        self.assertEqual(str(occasion), "Dia dos Pais (09/08)")
+
+    def test_message_occasion_rejects_invalid_date(self):
+        occasion = MessageOccasion(name="Data inválida", month=2, day=30)
+
+        with self.assertRaises(ValidationError):
+            occasion.full_clean()
 
     def test_optional_family_names_create_independent_incomplete_profiles(self):
         response = self.client.post(

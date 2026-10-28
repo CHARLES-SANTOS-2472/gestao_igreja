@@ -93,6 +93,7 @@ class MemberForm(forms.ModelForm):
             "is_placeholder",
             "email_consent",
             "whatsapp_consent",
+            "whatsapp_daily_consent",
         )
         widgets = {
             "birth_date": forms.DateInput(
@@ -136,8 +137,12 @@ class MemberForm(forms.ModelForm):
             "is_placeholder": forms.CheckboxInput(),
             "email_consent": forms.CheckboxInput(),
             "whatsapp_consent": forms.CheckboxInput(),
+            "whatsapp_daily_consent": forms.CheckboxInput(),
         }
-        labels = {"is_deceased": "Falecido(a) (in memoriam)"}
+        labels = {
+            "is_deceased": "Falecido(a) (in memoriam)",
+            "whatsapp_daily_consent": "Autorizo mensagens diárias pelo WhatsApp",
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -224,6 +229,17 @@ class MemberForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        if cleaned_data.get("whatsapp_daily_consent"):
+            if not cleaned_data.get("whatsapp_consent"):
+                self.add_error(
+                    "whatsapp_daily_consent",
+                    "Marque também a autorização geral para contato por WhatsApp.",
+                )
+            if not cleaned_data.get("mobile", "").strip():
+                self.add_error(
+                    "whatsapp_daily_consent",
+                    "Informe um celular para receber mensagens diárias.",
+                )
         occupation_code = cleaned_data.get("occupation_code", "").strip()
         occupation_search = cleaned_data.get("occupation_search", "").strip()
         selected_occupation = None
