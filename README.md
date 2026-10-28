@@ -83,8 +83,3 @@ Para produção, defina `DJANGO_ALLOWED_HOSTS` como uma lista separada por vírg
 
 Na tela de login, **Esqueci minha senha** envia um link (válido por 5 minutos) ao e-mail cadastrado no usuário. Sem SMTP configurado, o e-mail é exibido apenas no terminal do servidor. Para envio real, copie `.env.example` para `.env` (ignorado pelo Git) e preencha, ou defina EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend, EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD e DEFAULT_FROM_EMAIL.
 
-
-## Publicar no Render (com Cloudflare na frente)
-
-O arquivo `render.yaml` cria o servico web e o banco PostgreSQL. No Render: New > Blueprint > escolher este repositorio. Depois, em Environment, definir `EMAIL_*` e `PIX_*` se necessario. Os dados locais sao exportados com `manage.py dumpdata` (arquivo `dados_exportados.json`, nunca versionado) e importados com `manage.py loaddata` apontando `DATABASE_URL` para o banco do Render.
-

@@ -40,12 +40,6 @@ CSRF_TRUSTED_ORIGINS = [
     if origin.strip()
 ]
 
-# O Render informa o próprio endereço público nesta variável.
-_render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
-if _render_host:
-    ALLOWED_HOSTS.append(_render_host)
-    CSRF_TRUSTED_ORIGINS.append(f"https://{_render_host}")
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -65,7 +59,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -115,13 +108,6 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
-# Em produção (Render) o banco PostgreSQL vem em DATABASE_URL.
-if os.environ.get("DATABASE_URL"):
-    import dj_database_url
-
-    DATABASES["default"] = dj_database_url.parse(
-        os.environ["DATABASE_URL"], conn_max_age=600, conn_health_checks=True
-    )
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -137,11 +123,6 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
-STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
-}
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "login"
