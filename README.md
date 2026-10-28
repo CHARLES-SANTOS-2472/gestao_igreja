@@ -40,6 +40,16 @@ Usuários são desativados, não excluídos. Cada pessoa troca a própria senha 
 - O banco `db.sqlite3` e dados reais nunca devem ser versionados.
 - Instalação: `pip install -r requirements.txt`, `python manage.py migrate`, `python manage.py createsuperuser`, `python manage.py runserver`.
 
+## Executar no GitHub Codespaces
+
+1. No GitHub: **Settings > Secrets and variables > Codespaces > New repository secret** (ou em Settings da conta). Crie, com valores próprios e nunca no código: `DJANGO_SECRET_KEY` (texto longo e aleatório), `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USE_TLS`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` e `DEFAULT_FROM_EMAIL`.
+2. No repositório: **Code > Codespaces > Create codespace on main**. O ambiente instala as dependências, migra o banco e inicia o servidor na porta 8000.
+3. No terminal do Codespace: `python manage.py createsuperuser`.
+4. Aba **Portas**: porta 8000, clique direito > **Visibilidade da porta** > Pública (apresentação) ou Privada (só você).
+5. Se o servidor parar: `python manage.py runserver 0.0.0.0:8000 --noreload --insecure`.
+
+O Codespace hiberna quando fica parado. O banco do Codespace é independente do seu computador e começa vazio: use dados fictícios.
+
 ## Escopo desta etapa
 
 - Busca por nome, CPF, e-mail e celular, filtro por situação e paginação.

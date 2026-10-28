@@ -20,6 +20,10 @@ def _load_env_file(path):
 _load_env_file(BASE_DIR / ".env")
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-change-before-deploying")
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+if not DEBUG and SECRET_KEY == "dev-only-change-before-deploying":
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured("Defina DJANGO_SECRET_KEY (segredo) quando DJANGO_DEBUG=0.")
 
 # Dados do Pix da igreja (chave CNPJ informada no projeto). Ajuste por variáveis de ambiente.
 PIX_KEY = os.environ.get("PIX_KEY", "36605928000147")
