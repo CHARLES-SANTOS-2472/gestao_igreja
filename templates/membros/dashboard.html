@@ -21,12 +21,12 @@
 <section class="overview-section" aria-labelledby="overview-charts-title">
   <div class="overview-section-heading">
     <div><div class="eyebrow">PAINEL DE INDICADORES</div><h2 id="overview-charts-title">Visão geral da igreja</h2></div>
-    <span class="overview-section-note">Clique em uma barra ou no botão para abrir o módulo</span>
+    <span class="overview-section-note">Selecione um cartão para destacá-lo</span>
   </div>
   <div class="chart-grid">
     {% for chart in charts %}
-    <article class="chart-card {% cycle 'chart-green' 'chart-gold' %}{% if chart.code == 'ME' %} chart-featured{% elif chart.code == 'AG' or chart.code == 'DZ' %} chart-side-card{% endif %}{% if chart.code not in 'ME DZ AG' %} is-collapsed{% endif %}" data-chart-card>
-      <header class="chart-head" role="button" tabindex="0" aria-expanded="{% if chart.code in 'ME DZ AG' %}true{% else %}false{% endif %}" title="Clique para abrir ou recolher">
+    <article class="chart-card {% cycle 'chart-green' 'chart-gold' %}{% if forloop.first %} chart-featured{% else %} is-collapsed{% endif %}" data-chart-card>
+      <header class="chart-head" role="button" tabindex="0" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" title="Clique para destacar este gráfico">
         <span class="chart-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" focusable="false">
             {% if chart.code == "ME" %}
@@ -158,36 +158,27 @@
 {% block extra_js %}
 <script>
 (function () {
-  var MAX_OPEN = 3;
   var cards = Array.prototype.slice.call(document.querySelectorAll("[data-chart-card]"));
-  var openOrder = cards.filter(function (c) { return !c.classList.contains("is-collapsed"); });
+  var featured = document.querySelector(".chart-card.chart-featured");
 
-  function setState(card, open) {
-    card.classList.toggle("is-collapsed", !open);
-    card.querySelector(".chart-head").setAttribute("aria-expanded", open ? "true" : "false");
-  }
-
-  function toggle(card) {
-    var index = openOrder.indexOf(card);
-    if (index !== -1) {
-      openOrder.splice(index, 1);
-      setState(card, false);
-      return;
-    }
-    openOrder.push(card);
-    setState(card, true);
-    while (openOrder.length > MAX_OPEN) {
-      setState(openOrder.shift(), false);
-    }
+  function selectCard(card) {
+    if (card === featured) return;
+    featured.classList.remove("chart-featured");
+    featured.classList.add("is-collapsed");
+    featured.querySelector(".chart-head").setAttribute("aria-expanded", "false");
+    card.classList.remove("is-collapsed");
+    card.classList.add("chart-featured");
+    card.querySelector(".chart-head").setAttribute("aria-expanded", "true");
+    featured = card;
   }
 
   cards.forEach(function (card) {
     var head = card.querySelector(".chart-head");
-    head.addEventListener("click", function () { toggle(card); });
+    head.addEventListener("click", function () { selectCard(card); });
     head.addEventListener("keydown", function (event) {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        toggle(card);
+        selectCard(card);
       }
     });
   });
