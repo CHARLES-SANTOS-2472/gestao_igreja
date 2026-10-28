@@ -245,6 +245,46 @@ def build_charts(user):
             }
         )
 
+    if user.has_perm("financeiro.view_financialtransaction"):
+        months = _month_starts(6)
+        giving = FinancialTransaction.objects.filter(
+            kind=FinancialTransaction.Kind.INCOME,
+            status=FinancialTransaction.Status.SETTLED,
+            category__name__in=["Dízimos", "Ofertas"],
+            settled_on__gte=months[0],
+        )
+        giving_totals = {
+            (row["m"].year, row["m"].month, row["category__name"]): row["total"]
+            for row in giving.annotate(m=TruncMonth("settled_on"))
+            .values("m", "category__name")
+            .annotate(total=Sum("amount"))
+        }
+
+        def giving_series(name):
+            return [float(giving_totals.get((m.year, m.month, name), Decimal("0"))) for m in months]
+
+        tithes, offerings = giving_series("Dízimos"), giving_series("Ofertas")
+        charts.append(
+            {
+                "code": "DZ",
+                "title": "Dízimos e ofertas",
+                "subtitle": "Valores recebidos, últimos 6 meses",
+                "kind": "columns",
+                "chart": _columns(
+                    months,
+                    [
+                        {"name": "Dízimos", "css": "bar-green", "values": tithes},
+                        {"name": "Ofertas", "css": "bar-gold", "values": offerings},
+                    ],
+                    money=True,
+                ),
+                "total": f"R$ {sum(tithes) + sum(offerings):,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                "total_label": "no período",
+                "url": reverse("financial-transaction-list"),
+                "button": "Ver lançamentos",
+            }
+        )
+
     if user.has_perm("financeiro.view_donationrecord"):
         months = _month_starts(6)
         received = DonationRecord.objects.filter(

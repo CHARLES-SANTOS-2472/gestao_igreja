@@ -674,7 +674,7 @@ class MemberManagementTests(TestCase):
         response = self.client.get(reverse("dashboard"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context["charts"]), 9)
+        self.assertEqual(len(response.context["charts"]), 10)
         for label in ("Abrir agenda", "Abrir financeiro", "Abrir doações", "Abrir patrimônio", "Abrir assistência"):
             self.assertContains(response, label)
 
