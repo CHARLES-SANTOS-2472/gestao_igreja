@@ -118,8 +118,9 @@ h3 { margin-bottom: 7px; font-size: 17px; }
 .chart-head > div:nth-child(2) { flex: 1; min-width: 0; }
 .chart-head h3 { margin: 0; font-size: 15px; color: #1f463a; }
 .chart-head small { color: var(--muted); font-size: 11px; }
-.chart-code { display: grid; width: 36px; height: 36px; flex: none; place-items: center; border-radius: 10px; background: #dceade; color: #426b50; font-size: 11px; font-weight: 800; letter-spacing: .06em; }
-.chart-gold .chart-code { background: #eee2c7; color: #80673c; }
+.chart-icon { display: grid; width: 40px; height: 40px; flex: none; place-items: center; border-radius: 12px; background: #e8f2eb; color: #39745e; }
+.chart-icon svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.chart-gold .chart-icon { background: #f5efdf; color: #a17b36; }
 .chart-total { display: grid; justify-items: end; text-align: right; }
 .chart-total strong { color: #214b3e; font-family: Georgia, serif; font-size: 24px; line-height: 1; }
 .chart-total small { max-width: 90px; font-size: 10px; }
@@ -143,7 +144,7 @@ h3 { margin-bottom: 7px; font-size: 17px; }
 .chart-legend i { display: inline-block; width: 9px; height: 9px; margin-right: 5px; border-radius: 3px; }
 .chart-button { margin-top: auto; align-self: flex-start; padding: 8px 16px; border: 0; border-radius: 99px; background: #eaf2ed; color: #2c5a4b; font-size: 12px; font-weight: 700; text-decoration: none; transition: background .15s ease, color .15s ease; }
 .chart-button:hover { background: #2c5a4b; color: #fff; }
-.chart-code { box-shadow: none; }
+.chart-icon { box-shadow: none; }
 .chart-grid { align-items: start; }
 .chart-head { cursor: pointer; user-select: none; }
 .chart-head:focus-visible { outline: 2px solid #2f7d6b; outline-offset: 4px; border-radius: 10px; }
