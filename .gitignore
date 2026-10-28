@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 *.sqlite3
+dados_exportados.json
 .venv/
 staticfiles/
 .env
