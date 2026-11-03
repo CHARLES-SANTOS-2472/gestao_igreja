@@ -4,15 +4,18 @@
 <div class="page-heading">
   <div><div class="eyebrow">GESTÃO FINANCEIRA</div><h1>Financeiro</h1><p class="muted">Resumo de {{ today|date:"F Y" }}. Somente lançamentos recebidos ou pagos entram nos totais realizados.</p></div>
   <div class="page-actions">
-    <a class="button button-secondary" href="{% url 'financial-pix' %}">QR Code Pix</a>
-    {% if can_manage_accounts %}<a class="button button-secondary" href="{% url 'pix-key-list' %}">Chaves Pix</a><a class="button button-secondary" href="{% url 'card-machine-list' %}">Maquininhas</a>{% endif %}
-    <a class="button button-secondary" href="{% url 'financial-report' %}">Relatórios</a>
-    {% if can_view_donations %}<a class="button button-secondary" href="{% url 'donation-list' %}">Doações</a>{% endif %}
-    <a class="button button-secondary" href="{% url 'financial-transaction-list' %}">Ver lançamentos</a>
     {% if can_add_donation %}<a class="button button-primary" href="{% url 'donation-create' %}">+ Registrar doação</a>{% endif %}
     {% if can_add_transaction %}<a class="button button-primary" href="{% url 'financial-transaction-create' %}">+ Novo lançamento</a>{% endif %}
   </div>
 </div>
+<nav class="tile-nav" aria-label="Atalhos do financeiro">
+  <a class="tile" href="{% url 'financial-pix' %}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM18 18h3v3h-3z"/></svg><span>QR Code Pix</span></a>
+  {% if can_manage_accounts %}<a class="tile" href="{% url 'pix-key-list' %}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/></svg><span>Chaves Pix</span></a>
+  <a class="tile" href="{% url 'card-machine-list' %}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg><span>Maquininhas</span></a>{% endif %}
+  <a class="tile" href="{% url 'financial-report' %}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Relatórios</span></a>
+  {% if can_view_donations %}<a class="tile" href="{% url 'donation-list' %}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-8-5.3-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.7-8 11-8 11z"/></svg><span>Doações</span></a>{% endif %}
+  <a class="tile" href="{% url 'financial-transaction-list' %}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Lançamentos</span></a>
+</nav>
 <section class="stats-grid" aria-label="Resumo financeiro do mês">
   <article class="stat-card"><span class="stat-label">Receitas realizadas</span><strong>R$ {{ month_income|floatformat:2 }}</strong><span class="stat-note">Recebidas neste mês</span></article>
   <article class="stat-card"><span class="stat-label">Despesas realizadas</span><strong>R$ {{ month_expense|floatformat:2 }}</strong><span class="stat-note">Pagas neste mês</span></article>
