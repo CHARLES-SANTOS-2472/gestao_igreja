@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CboOccupation, FamilyRelationship, Member, MessageOccasion
+from .models import CboOccupation, ChurchMessage, FamilyRelationship, Member, MessageOccasion
 
 
 class FamilyRelationshipInline(admin.TabularInline):
@@ -65,3 +65,9 @@ class MessageOccasionAdmin(admin.ModelAdmin):
 admin.site.site_header = "Gestão da Igreja"
 admin.site.site_title = "Administração"
 admin.site.index_title = "Administração do sistema"
+
+
+@admin.register(ChurchMessage)
+class ChurchMessageAdmin(admin.ModelAdmin):
+    list_display = ("title", "reference", "updated_at")
+

@@ -16,8 +16,8 @@ from ministerios.models import Department
 from patrimonio.models import AdministrativeTask, ChurchAsset
 
 from .dashboard_charts import build_charts
-from .forms import MemberForm
-from .models import CboOccupation, Member
+from .forms import ChurchMessageForm, MemberForm
+from .models import CboOccupation, ChurchMessage, Member
 
 
 @login_required
@@ -230,7 +230,23 @@ class DashboardView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
         context["dashboard_cards"] = cards
         context["charts"] = build_charts(user)
         context["upcoming_events"] = upcoming_events
+        context["church_message"] = ChurchMessage.current()
         return context
+
+
+class ChurchMessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    form_class = ChurchMessageForm
+    template_name = "membros/church_message_form.html"
+    permission_required = "membros.change_churchmessage"
+    raise_exception = True
+    success_url = reverse_lazy("dashboard")
+
+    def get_object(self, queryset=None):
+        return ChurchMessage.current()
+
+    def form_valid(self, form):
+        messages.success(self.request, "Mensagem da igreja atualizada.")
+        return super().form_valid(form)
 
 
 class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):

@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    ChurchMessageUpdateView,
     DashboardView,
     MemberCreateView,
     MemberDetailView,
@@ -14,6 +15,7 @@ from .views import (
 
 urlpatterns = [
     path("", DashboardView.as_view(), name="dashboard"),
+    path("mensagem/editar/", ChurchMessageUpdateView.as_view(), name="church-message-update"),
     path("pessoas/profissoes/cbo/", cbo_occupation_search, name="cbo-occupation-search"),
     path("visitantes/", VisitorListView.as_view(), name="visitor-list"),
     path("visitantes/novo/", VisitorCreateView.as_view(), name="visitor-create"),

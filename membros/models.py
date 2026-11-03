@@ -61,6 +61,35 @@ class MessageOccasion(models.Model):
         return f"{self.name} ({self.day:02d}/{self.month:02d})"
 
 
+class ChurchMessage(models.Model):
+    DEFAULT_TEXT = (
+        "Não vos lembreis das coisas passadas, nem considereis as antigas. "
+        "Eis que faço uma coisa nova, agora sairá à luz; porventura não a percebeis? "
+        "Eis que porei um caminho no deserto, e rios no ermo."
+    )
+    DEFAULT_REFERENCE = "Isaías 43:18-19"
+
+    title = models.CharField("título", max_length=80, default="Mensagem da igreja")
+    text = models.TextField("texto", max_length=1200, default=DEFAULT_TEXT)
+    reference = models.CharField(
+        "referência", max_length=80, blank=True, default=DEFAULT_REFERENCE,
+        help_text="Ex.: Isaías 43:18-19.",
+    )
+    updated_at = models.DateTimeField("atualizada em", auto_now=True)
+
+    class Meta:
+        verbose_name = "mensagem da igreja"
+        verbose_name_plural = "mensagem da igreja"
+
+    @classmethod
+    def current(cls):
+        message = cls.objects.order_by("pk").first()
+        return message or cls.objects.create()
+
+    def __str__(self):
+        return self.title
+
+
 class Member(PhotoModelMixin, models.Model):
     class Status(models.TextChoices):
         MEMBER = "member", "Membro"

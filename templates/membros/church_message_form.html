@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Mensagem da igreja · Gestão da Igreja{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow"><a class="back-link" href="{% url 'dashboard' %}">VISÃO GERAL</a> / MENSAGEM</div><h1>Mensagem da igreja</h1><p class="muted">O texto aparece na página inicial para todos os usuários.</p></div></div>
+<form method="post" class="panel form-panel">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="form-grid">{% for field in form %}<div class="field field-wide">
+    <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required">*</span>{% endif %}</label>{{ field }}
+    {% if field.help_text %}<span class="help-text">{{ field.help_text }}</span>{% endif %}
+    {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+  </div>{% endfor %}</div>
+  <div class="form-actions"><a class="button button-secondary" href="{% url 'dashboard' %}">Cancelar</a><button class="button button-primary" type="submit">Salvar mensagem</button></div>
+</form>
+{% endblock %}

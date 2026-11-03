@@ -2,8 +2,15 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from .models import CboOccupation, Member
+from .models import ChurchMessage, CboOccupation, Member
 from .photos import PhotoFormMixin
+
+
+class ChurchMessageForm(forms.ModelForm):
+    class Meta:
+        model = ChurchMessage
+        fields = ("title", "text", "reference")
+        widgets = {"text": forms.Textarea(attrs={"rows": 6, "maxlength": 1200})}
 
 
 class FamilyMemberMultipleChoiceField(forms.ModelMultipleChoiceField):
