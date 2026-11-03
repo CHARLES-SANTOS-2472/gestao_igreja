@@ -154,7 +154,7 @@ CHURCH_SIGNATURE = os.environ.get("CHURCH_SIGNATURE", "Pastores da Comunidade Fa
 CHURCH_NAME = os.environ.get("CHURCH_NAME", "Comunidade Família da Fé")
 CHURCH_CNPJ = os.environ.get("CHURCH_CNPJ", "36605928000147")
 CHURCH_ADDRESS = os.environ.get(
-    "CHURCH_ADDRESS", "Rua Guasupé, nº 121, Piabetá, Magé/RJ, CEP 25900-001"
+    "CHURCH_ADDRESS", "Rua Guaxupé, nº 121, Piabetá, Magé/RJ, CEP 25900-001"
 )
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
