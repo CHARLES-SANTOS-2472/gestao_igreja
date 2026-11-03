@@ -21,9 +21,22 @@ class CboOccupation(models.Model):
 
 
 class MessageOccasion(models.Model):
+    SUNDAY_CHOICES = [(1, "1º domingo"), (2, "2º domingo"), (3, "3º domingo"), (4, "4º domingo")]
+    MONTH_NAMES = [
+        "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+        "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
+    ]
+
     name = models.CharField("ocasião", max_length=100)
     month = models.PositiveSmallIntegerField("mês")
-    day = models.PositiveSmallIntegerField("dia")
+    day = models.PositiveSmallIntegerField(
+        "dia", null=True, blank=True,
+        help_text="Para datas fixas (ex.: 25 de dezembro). Deixe em branco se for um domingo do mês.",
+    )
+    nth_sunday = models.PositiveSmallIntegerField(
+        "domingo do mês", null=True, blank=True, choices=SUNDAY_CHOICES,
+        help_text="Para datas móveis (ex.: Dia das Mães = 2º domingo de maio). Deixe o dia em branco.",
+    )
     ai_guidance = models.TextField(
         "orientação para a mensagem", blank=True,
         help_text="Contexto opcional para a IA criar a mensagem desta ocasião.",
@@ -43,7 +56,11 @@ class MessageOccasion(models.Model):
                 name="unique_message_occasion_per_date",
             ),
             models.CheckConstraint(
-                condition=Q(month__gte=1, month__lte=12, day__gte=1, day__lte=31),
+                condition=Q(month__gte=1, month__lte=12)
+                & (
+                    Q(day__gte=1, day__lte=31, nth_sunday__isnull=True)
+                    | Q(day__isnull=True, nth_sunday__gte=1, nth_sunday__lte=4)
+                ),
                 name="message_occasion_month_day_range",
             ),
         ]
@@ -52,13 +69,34 @@ class MessageOccasion(models.Model):
 
     def clean(self):
         super().clean()
-        try:
-            date(2000, self.month, self.day)
-        except (TypeError, ValueError):
-            raise ValidationError({"day": "Informe um dia válido para o mês escolhido."})
+        if self.day and self.nth_sunday:
+            raise ValidationError("Informe o dia fixo ou o domingo do mês, não os dois.")
+        if not self.day and not self.nth_sunday:
+            raise ValidationError({"day": "Informe o dia ou escolha o domingo do mês."})
+        if not self.month or not 1 <= self.month <= 12:
+            raise ValidationError({"month": "Escolha um mês válido."})
+        if self.day:
+            try:
+                date(2000, self.month, self.day)
+            except (TypeError, ValueError):
+                raise ValidationError({"day": "Informe um dia válido para o mês escolhido."})
+
+    def occurs_on(self, when):
+        if when.month != self.month:
+            return False
+        if self.nth_sunday:
+            return when.weekday() == 6 and (when.day - 1) // 7 + 1 == self.nth_sunday
+        return when.day == self.day
+
+    @property
+    def date_label(self):
+        month = self.MONTH_NAMES[self.month - 1] if 1 <= self.month <= 12 else "?"
+        if self.nth_sunday:
+            return f"{self.nth_sunday}º domingo de {month}"
+        return f"{self.day:02d}/{self.month:02d}"
 
     def __str__(self):
-        return f"{self.name} ({self.day:02d}/{self.month:02d})"
+        return f"{self.name} ({self.date_label})"
 
 
 class ChurchMessage(models.Model):

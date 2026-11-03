@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from .models import ChurchMessage, CboOccupation, Member
+from .models import ChurchMessage, CboOccupation, Member, MessageOccasion
 from .photos import PhotoFormMixin
 
 
@@ -11,6 +11,21 @@ class ChurchMessageForm(forms.ModelForm):
         model = ChurchMessage
         fields = ("intro", "text", "reference")
         widgets = {"text": forms.Textarea(attrs={"rows": 6, "maxlength": 1200})}
+
+
+class MessageOccasionForm(forms.ModelForm):
+    month = forms.TypedChoiceField(
+        label="Mês", coerce=int,
+        choices=[(i + 1, name.capitalize()) for i, name in enumerate(MessageOccasion.MONTH_NAMES)],
+    )
+
+    class Meta:
+        model = MessageOccasion
+        fields = ("name", "month", "day", "nth_sunday", "ai_guidance", "whatsapp_template_name", "active")
+        widgets = {
+            "ai_guidance": forms.Textarea(attrs={"rows": 3}),
+            "day": forms.NumberInput(attrs={"min": 1, "max": 31}),
+        }
 
 
 class FamilyMemberMultipleChoiceField(forms.ModelMultipleChoiceField):

@@ -72,9 +72,9 @@ class MessagingTests(TestCase):
             whatsapp_daily_consent=True,
         )
         day = date(2026, 5, 10)
-        MessageOccasion.objects.create(name="Dia das Mães", month=5, day=10)
+        MessageOccasion.objects.create(name="Dia da Música", month=5, day=10)
         counts = run_daily(day)
-        self.assertEqual(counts["occasion"], 3)
+        self.assertEqual(counts["occasion"], 6)
         self.assertEqual(counts["daily"], 0)
         daily = run_daily(date(2026, 6, 1))
         self.assertEqual(daily["daily"], 2)

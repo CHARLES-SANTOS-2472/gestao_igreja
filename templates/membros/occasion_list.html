@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Ocasiões de mensagens · Gestão da Igreja{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'dashboard' %}">VISÃO GERAL</a> / OCASIÕES</div><h1>Ocasiões de mensagens</h1><p class="muted">Nas datas abaixo, quem autorizou recebe automaticamente uma mensagem com banner e versículo, além dos aniversários.</p></div>
+  {% if can_add %}<a class="button button-primary" href="{% url 'occasion-create' %}">+ Nova ocasião</a>{% endif %}
+</div>
+<section class="panel upcoming-panel">
+  {% if occasions %}<div class="table-wrap"><table><thead><tr><th>Ocasião</th><th>Data</th><th>Situação</th><th></th></tr></thead><tbody>
+    {% for occasion in occasions %}<tr>
+      <td>{% if can_change %}<a class="person-link" href="{% url 'occasion-update' occasion.pk %}">{{ occasion.name }}</a>{% else %}{{ occasion.name }}{% endif %}{% if occasion.ai_guidance %}<span class="subline">{{ occasion.ai_guidance }}</span>{% endif %}</td>
+      <td>{{ occasion.date_label }}</td>
+      <td>{% if occasion.active %}Ativa{% else %}Desativada{% endif %}</td>
+      <td class="row-actions">{% if can_change %}<a class="text-link" href="{% url 'occasion-update' occasion.pk %}">Editar</a>{% endif %}
+        {% if can_delete %}<form method="post" action="{% url 'occasion-delete' occasion.pk %}" class="inline-form" onsubmit="return confirm('Excluir esta ocasião?');">{% csrf_token %}<button class="text-link" type="submit">Excluir</button></form>{% endif %}</td>
+    </tr>{% endfor %}
+  </tbody></table></div>{% else %}<div class="empty-compact">Nenhuma ocasião cadastrada.</div>{% endif %}
+</section>
+{% endblock %}

@@ -16,8 +16,8 @@ from ministerios.models import Department
 from patrimonio.models import AdministrativeTask, ChurchAsset
 
 from .dashboard_charts import build_charts
-from .forms import ChurchMessageForm, MemberForm
-from .models import CboOccupation, ChurchMessage, Member
+from .forms import ChurchMessageForm, MemberForm, MessageOccasionForm
+from .models import CboOccupation, ChurchMessage, Member, MessageOccasion
 
 
 @login_required
@@ -247,6 +247,61 @@ class ChurchMessageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, Updat
     def form_valid(self, form):
         messages.success(self.request, "Mensagem da igreja atualizada.")
         return super().form_valid(form)
+
+
+class OccasionBase(LoginRequiredMixin, PermissionRequiredMixin):
+    model = MessageOccasion
+    raise_exception = True
+    success_url = reverse_lazy("occasion-list")
+
+
+class OccasionListView(OccasionBase, ListView):
+    template_name = "membros/occasion_list.html"
+    context_object_name = "occasions"
+    permission_required = "membros.view_messageoccasion"
+
+    def get_queryset(self):
+        return sorted(
+            MessageOccasion.objects.all(),
+            key=lambda o: (o.month, o.day or (o.nth_sunday or 0) * 7, o.name),
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["can_add"] = self.request.user.has_perm("membros.add_messageoccasion")
+        context["can_change"] = self.request.user.has_perm("membros.change_messageoccasion")
+        context["can_delete"] = self.request.user.has_perm("membros.delete_messageoccasion")
+        return context
+
+
+class OccasionCreateView(OccasionBase, CreateView):
+    form_class = MessageOccasionForm
+    template_name = "membros/occasion_form.html"
+    permission_required = "membros.add_messageoccasion"
+
+    def form_valid(self, form):
+        messages.success(self.request, "Ocasião cadastrada.")
+        return super().form_valid(form)
+
+
+class OccasionUpdateView(OccasionBase, UpdateView):
+    form_class = MessageOccasionForm
+    template_name = "membros/occasion_form.html"
+    permission_required = "membros.change_messageoccasion"
+
+    def form_valid(self, form):
+        messages.success(self.request, "Ocasião atualizada.")
+        return super().form_valid(form)
+
+
+@login_required
+@permission_required("membros.delete_messageoccasion", raise_exception=True)
+@require_POST
+def occasion_delete(request, pk):
+    occasion = get_object_or_404(MessageOccasion, pk=pk)
+    occasion.delete()
+    messages.success(request, f"Ocasião “{occasion.name}” excluída.")
+    return redirect("occasion-list")
 
 
 class MemberListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):

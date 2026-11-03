@@ -337,7 +337,11 @@ def run_daily(today=None, live=None):
         for channel in channels:
             tally(deliver(member, channel, MessageLog.Kind.BIRTHDAY, today, live=live), "birthday")
 
-    occasions = MessageOccasion.objects.filter(active=True, month=today.month, day=today.day)
+    occasions = [
+        occasion
+        for occasion in MessageOccasion.objects.filter(active=True, month=today.month)
+        if occasion.occurs_on(today)
+    ]
     for occasion in occasions:
         for member in eligible_members():
             for channel in channels:

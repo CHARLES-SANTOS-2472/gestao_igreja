@@ -48,14 +48,15 @@ class CboOccupationAdmin(admin.ModelAdmin):
 
 @admin.register(MessageOccasion)
 class MessageOccasionAdmin(admin.ModelAdmin):
-    list_display = ("name", "day", "month", "active", "whatsapp_template_name")
+    list_display = ("name", "date_label", "active", "whatsapp_template_name")
     list_filter = ("active", "month")
     search_fields = ("name", "ai_guidance", "whatsapp_template_name")
     ordering = ("month", "day", "name")
     fields = (
         "name",
-        "day",
         "month",
+        "day",
+        "nth_sunday",
         "ai_guidance",
         "whatsapp_template_name",
         "active",

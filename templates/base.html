@@ -58,6 +58,9 @@
     {% if perms.assistencia_social.view_assistedfamily %}
     <a href="{% url 'assisted-family-list' %}">Assistência social</a>
     {% endif %}
+    {% if perms.membros.view_messageoccasion %}
+    <a href="{% url 'occasion-list' %}">Ocasiões</a>
+    {% endif %}
     {% if can_manage_users %}
     <a href="{% url 'user-list' %}">Usuários</a>
     {% endif %}
