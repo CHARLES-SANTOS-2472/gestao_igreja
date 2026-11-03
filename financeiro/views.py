@@ -29,6 +29,7 @@ from .forms import (
     FinancialTransactionForm,
 )
 from .pix import build_pix_payload, qr_svg
+from .pdf import build_receipt_pdf, build_report_pdf, pdf_response, report_csv_response
 from .models import (
     CardMachine,
     PixKey,
@@ -684,6 +685,17 @@ class DonationRecordDetailView(
         return context
 
 
+class DonationReceiptView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    permission_required = "financeiro.view_donationrecord"
+
+    def get(self, request, pk):
+        donation = get_object_or_404(DonationRecord, pk=pk)
+        if donation.status != DonationRecord.Status.RECEIVED:
+            messages.error(request, "Doações canceladas não geram recibo.")
+            return redirect("donation-detail", pk=pk)
+        return pdf_response(build_receipt_pdf(donation), f"recibo-{donation.pk:05d}.pdf")
+
+
 class DonationRecordCancelView(
     LoginRequiredMixin, PermissionRequiredMixin, View
 ):
@@ -749,6 +761,16 @@ class DonationRecordCancelView(
 class FinancialReportView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
     template_name = "financeiro/report.html"
     permission_required = "financeiro.view_financialtransaction"
+
+    def render_to_response(self, context, **response_kwargs):
+        form = context["filter_form"]
+        if self.request.GET.get("formato") in ("pdf", "csv") and form.is_bound and not form.is_valid():
+            return super().render_to_response(context, **response_kwargs)
+        if self.request.GET.get("formato") == "pdf":
+            return pdf_response(build_report_pdf(context), "prestacao-de-contas.pdf")
+        if self.request.GET.get("formato") == "csv":
+            return report_csv_response(context)
+        return super().render_to_response(context, **response_kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

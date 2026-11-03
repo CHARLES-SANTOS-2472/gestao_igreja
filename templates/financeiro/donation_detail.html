@@ -3,7 +3,7 @@
 {% block content %}
 <div class="page-heading">
   <div><div class="eyebrow"><a class="back-link" href="{% url 'donation-list' %}">DOAÇÕES RECEBIDAS</a> / REGISTRO</div><h1>{% if donation.anonymous %}Doação anônima{% else %}{{ donation.donor_name|default:"Doador não informado" }}{% endif %}</h1><p class="muted">{{ donation.get_donation_type_display }} · {{ donation.get_status_display }}</p></div>
-  <a class="button button-secondary" href="{% url 'donation-list' %}">Voltar à lista</a>
+  <div>{% if donation.status == "received" %}<a class="button button-primary" href="{% url 'donation-receipt' donation.pk %}">Emitir recibo (PDF)</a> {% endif %}<a class="button button-secondary" href="{% url 'donation-list' %}">Voltar à lista</a></div>
 </div>
 <section class="panel">
   <div class="panel-heading"><div><h2>Detalhes da doação</h2><p class="muted">Um registro por destinação para permitir conferência e prestação de contas.</p></div></div>

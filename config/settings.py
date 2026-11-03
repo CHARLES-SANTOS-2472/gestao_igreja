@@ -151,6 +151,11 @@ PASSWORD_RESET_TIMEOUT = 300
 # Mensagens automáticas (app comunicacao). Sem MESSAGING_LIVE=1 tudo é apenas simulado.
 MESSAGING_LIVE = os.environ.get("MESSAGING_LIVE", "0") == "1"
 CHURCH_SIGNATURE = os.environ.get("CHURCH_SIGNATURE", "Pastores da Comunidade Família da Fé")
+CHURCH_NAME = os.environ.get("CHURCH_NAME", "Comunidade Família da Fé")
+CHURCH_CNPJ = os.environ.get("CHURCH_CNPJ", "36605928000147")
+CHURCH_ADDRESS = os.environ.get(
+    "CHURCH_ADDRESS", "Rua Guasupé, nº 121, Piabetá, Magé/RJ, CEP 25900-001"
+)
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN", "")

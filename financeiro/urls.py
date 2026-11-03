@@ -12,6 +12,7 @@ from .views import (
     DonationRecordCreateView,
     DonationRecordDetailView,
     DonationRecordListView,
+    DonationReceiptView,
     FinancialAccountCreateView,
     FinancialAccountDetailView,
     FinancialAccountListView,
@@ -49,6 +50,11 @@ urlpatterns = [
         "doacoes/<int:pk>/",
         DonationRecordDetailView.as_view(),
         name="donation-detail",
+    ),
+    path(
+        "doacoes/<int:pk>/recibo/",
+        DonationReceiptView.as_view(),
+        name="donation-receipt",
     ),
     path(
         "doacoes/<int:pk>/cancelar/",

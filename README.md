@@ -108,3 +108,7 @@ As imagens ficam em `media/` (fora do Git). Para levá-las ao Codespace, `python
 
 - **Histórico** (menu "Histórico", só administradores): registra quem cadastrou, alterou ou excluiu cada registro, com data e hora. Guarda apenas os nomes dos campos alterados, nunca os valores (CPF, dados financeiros etc.).
 - **Backup**: `python manage.py backup` gera `backups/backup-AAAAMMDD-HHMMSS.zip` com os dados e as imagens (`--manter 14` mantém só as 14 mais recentes). Para restaurar: `python manage.py backup --restaurar backups/arquivo.zip`. A pasta `backups/` não vai ao Git; guarde as cópias em local seguro, pois contêm dados pessoais.
+
+## PDFs e planilha do financeiro
+
+Os documentos usam o cabeçalho da igreja (logo, nome, CNPJ e endereço, definidos em `CHURCH_NAME`, `CHURCH_CNPJ` e `CHURCH_ADDRESS`). Em **Financeiro > Relatórios**, escolha o período e use "Baixar PDF" (prestação de contas com campos de assinatura) ou "Baixar planilha" (CSV que abre no Excel). Em cada doação recebida, "Emitir recibo (PDF)" gera o recibo; doações canceladas não geram recibo.
