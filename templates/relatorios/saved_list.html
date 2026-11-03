@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Meus relatórios · Gestão da Igreja{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'report-hub' %}">RELATÓRIOS</a></div><h1>Meus relatórios</h1><p class="muted">Rascunhos e relatórios finalizados. Abra um para continuar, baixar ou reabrir.</p></div>
+</div>
+<section class="panel upcoming-panel">
+  {% if items %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>Relatório</th><th>Situação</th><th>Atualizado em</th><th>Autor</th><th></th></tr></thead>
+    <tbody>
+    {% for item in items %}
+    <tr>
+      <td>{{ item.title }}</td>
+      <td>{{ item.saved.get_status_display }}{% if item.saved.finalized_on %} em {{ item.saved.finalized_on|date:"d/m/Y" }}{% endif %}</td>
+      <td>{{ item.saved.updated_at|date:"d/m/Y H:i" }}</td>
+      <td>{{ item.saved.created_by.get_full_name|default:item.saved.created_by.get_username }}</td>
+      <td><a class="button button-secondary" href="{% url 'report-saved' item.saved.pk %}">Abrir</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}<div class="empty-compact">Nenhum relatório salvo ainda.</div>{% endif %}
+</section>
+{% endblock %}

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "membros",
     "comunicacao",
     "auditoria",
+    "relatorios",
     "eventos",
     "ministerios",
     "financeiro",
@@ -153,6 +154,7 @@ MESSAGING_LIVE = os.environ.get("MESSAGING_LIVE", "0") == "1"
 CHURCH_SIGNATURE = os.environ.get("CHURCH_SIGNATURE", "Pastores da Comunidade Família da Fé")
 CHURCH_NAME = os.environ.get("CHURCH_NAME", "Comunidade Família da Fé")
 CHURCH_CNPJ = os.environ.get("CHURCH_CNPJ", "36605928000147")
+CHURCH_CITY = os.environ.get("CHURCH_CITY", "Magé")
 CHURCH_ADDRESS = os.environ.get(
     "CHURCH_ADDRESS", "Rua Guaxupé, nº 121, Piabetá, Magé/RJ, CEP 25900-001"
 )

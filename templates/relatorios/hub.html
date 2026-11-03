@@ -2,7 +2,8 @@
 {% block title %}Relatórios · Gestão da Igreja{% endblock %}
 {% block content %}
 <div class="page-heading">
-  <div><div class="eyebrow">DOCUMENTOS</div><h1>Relatórios</h1><p class="muted">Veja a pré-visualização, acrescente suas considerações e baixe em PDF ou planilha. Cada área só mostra o que você tem permissão para ver.</p></div>
+  <div><div class="eyebrow">DOCUMENTOS</div><h1>Relatórios</h1><p class="muted">Veja a pré-visualização, escreva introdução, desenvolvimento, conclusão e recomendações, e baixe em PDF ou planilha. Cada área só mostra o que você tem permissão para ver.</p></div>
+  <div class="page-actions"><a class="button button-secondary" href="{% url 'report-saved-list' %}">Meus relatórios salvos</a></div>
 </div>
 {% for module, items in modules %}
 <section class="panel upcoming-panel">

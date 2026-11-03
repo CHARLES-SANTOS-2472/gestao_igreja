@@ -10,6 +10,7 @@ from financeiro.models import DonationRecord
 from membros.models import Member
 from ministerios.models import Department, DepartmentActivity
 
+from .models import SavedReport
 from .registry import REPORTS
 
 
@@ -77,3 +78,59 @@ class ReportTests(TestCase):
         url = reverse("report", args=["membros"])
         response = self.client.post(url, {"acao": "preview", "conclusion": "<script>alert(1)</script>"})
         self.assertNotContains(response, "<script>alert(1)</script>")
+
+    def test_draft_finalize_reopen_flow(self):
+        url = reverse("report", args=["membros"])
+        data = {"introduction": "Intro", "conclusion": "Fim", "signer_name": "Pr. João", "signer_role": "Pastor"}
+        response = self.client.post(url, {**data, "acao": "save"})
+        saved = SavedReport.objects.get()
+        self.assertRedirects(response, reverse("report-saved", args=[saved.pk]))
+        self.assertEqual(saved.status, "draft")
+        self.assertContains(self.client.get(reverse("report-saved", args=[saved.pk])), "Intro")
+
+        saved_url = reverse("report-saved", args=[saved.pk])
+        self.client.post(saved_url, {**data, "introduction": "Intro 2", "acao": "finalize"})
+        saved.refresh_from_db()
+        self.assertEqual(saved.status, "final")
+        self.assertEqual(saved.finalized_on, timezone.localdate())
+        self.assertEqual(saved.introduction, "Intro 2")
+
+        self.client.post(saved_url, {**data, "introduction": "Alterado", "acao": "save"})
+        saved.refresh_from_db()
+        self.assertEqual(saved.introduction, "Intro 2")
+        response = self.client.post(saved_url, {"acao": "pdf"})
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        response = self.client.post(saved_url, {"acao": "csv"})
+        body = response.content.decode("utf-8-sig")
+        self.assertIn("Magé,", body)
+        self.assertIn("Pr. João", body)
+        self.assertIn("Pastor", body)
+
+        self.client.post(saved_url, {"acao": "reopen"})
+        saved.refresh_from_db()
+        self.assertEqual((saved.status, saved.finalized_on), ("draft", None))
+
+    def test_finalize_requires_signer_name(self):
+        url = reverse("report", args=["membros"])
+        response = self.client.post(url, {"acao": "finalize", "introduction": "x"})
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(SavedReport.objects.exists())
+
+    def test_scoped_default_role_and_privacy(self):
+        self.admin.first_name, self.admin.last_name = "Ana", "Lima"
+        self.admin.save()
+        url = reverse("report-scoped", args=["ministerio", self.dept.pk])
+        self.assertContains(self.client.get(url), "Líder do ministério Louvor")
+        self.client.post(reverse("report", args=["membros"]), {"acao": "save", "signer_name": "A"})
+        saved = SavedReport.objects.get()
+        other = get_user_model().objects.create_user("outro", password="senha-Forte-123")
+        self.client.force_login(other)
+        self.assertEqual(self.client.get(reverse("report-saved", args=[saved.pk])).status_code, 403)
+        self.assertNotContains(self.client.get(reverse("report-saved-list")), "Membros")
+
+    def test_saved_list_and_delete(self):
+        self.client.post(reverse("report", args=["membros"]), {"acao": "save", "signer_name": "A"})
+        saved = SavedReport.objects.get()
+        self.assertContains(self.client.get(reverse("report-saved-list")), "Rascunho")
+        self.client.post(reverse("report-saved", args=[saved.pk]), {"acao": "delete"})
+        self.assertFalse(SavedReport.objects.exists())

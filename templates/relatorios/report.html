@@ -13,14 +13,19 @@
       <div><label for="{{ form.date_from.id_for_label }}">Data inicial</label>{{ form.date_from }}{% for error in form.date_from.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>
       <div><label for="{{ form.date_to.id_for_label }}">Data final</label>{{ form.date_to }}{% for error in form.date_to.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>
       {% endif %}
-      <button class="button button-secondary" type="submit" name="acao" value="preview">Atualizar pré-visualização</button>
+      {% if not locked %}<button class="button button-secondary" type="submit" name="acao" value="preview">Atualizar pré-visualização</button>{% endif %}
     </div>
+    {% if locked %}<div class="message">Relatório finalizado em {{ saved.finalized_on|date:"d/m/Y" }}. Para editar, use "Reabrir para edição".</div>{% endif %}
     <div class="notes-grid">
       {% for field in form.visible_fields %}{% if field.name in note_names %}
       <div><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}<span class="muted">{{ field.help_text }}</span></div>
       {% endif %}{% endfor %}
     </div>
-    <p class="muted">Os textos entram no relatório (Introdução e Desenvolvimento antes dos dados; Conclusão e Recomendações depois) e não ficam salvos no sistema.</p>
+    <div class="filters">
+      <div><label for="{{ form.signer_name.id_for_label }}">{{ form.signer_name.label }}</label>{{ form.signer_name }}{% for error in form.signer_name.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>
+      <div><label for="{{ form.signer_role.id_for_label }}">{{ form.signer_role.label }}</label>{{ form.signer_role }}</div>
+    </div>
+    <p class="muted">Introdução e Desenvolvimento entram antes dos dados; Conclusão e Recomendações, depois. No final vão a cidade, a data e a assinatura com nome e cargo. Use "Salvar rascunho" para continuar depois; "Finalizar" registra a data de hoje e trava o texto.</p>
   </section>
 
   <section class="panel upcoming-panel report-preview">
@@ -36,9 +41,17 @@
     {% endfor %}
     {% if form.conclusion.value %}<h3 class="report-section-title">Conclusão e considerações</h3><p class="report-note">{{ form.conclusion.value|linebreaksbr }}</p>{% endif %}
     {% if form.recommendations.value %}<h3 class="report-section-title">Recomendações finais</h3><p class="report-note">{{ form.recommendations.value|linebreaksbr }}</p>{% endif %}
+    <div class="report-signature"><p>{{ city }}, {{ issued_on|date:"d \d\e F \d\e Y" }}</p><div class="signature-line"></div><strong>{{ form.signer_name.value|default:request.user.get_username }}</strong>{% if form.signer_role.value %}<span>{{ form.signer_role.value }}</span>{% endif %}</div>
   </section>
 
   <div class="form-actions">
+    {% if saved %}<a class="button button-secondary" href="{% url 'report-saved-list' %}">Meus relatórios</a>{% endif %}
+    {% if saved %}<button class="button button-secondary" type="submit" name="acao" value="delete" onclick="return confirm('Excluir este relatório salvo?')">Excluir</button>{% endif %}
+    {% if locked %}<button class="button button-secondary" type="submit" name="acao" value="reopen">Reabrir para edição</button>
+    {% else %}
+    <button class="button button-secondary" type="submit" name="acao" value="save">Salvar rascunho</button>
+    <button class="button button-secondary" type="submit" name="acao" value="finalize">Finalizar</button>
+    {% endif %}
     <button class="button button-secondary" type="submit" name="acao" value="csv">Baixar planilha</button>
     <button class="button button-primary" type="submit" name="acao" value="pdf">Baixar PDF</button>
   </div>

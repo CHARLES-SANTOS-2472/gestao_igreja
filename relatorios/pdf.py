@@ -1,7 +1,9 @@
 import csv
 from xml.sax.saxutils import escape
 
+from django.conf import settings
 from django.http import HttpResponse
+from django.utils import timezone
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
@@ -32,6 +34,15 @@ def _note_story(blocks):
     return [KeepTogether([Paragraph(label, H2), Paragraph(_text(text), BODY)]) for label, text in blocks]
 
 
+MONTHS = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
+          "agosto", "setembro", "outubro", "novembro", "dezembro"]
+CENTER = ParagraphStyle("center", parent=CELL, alignment=1)
+
+
+def long_date(value):
+    return f"{value.day:02d} de {MONTHS[value.month - 1]} de {value.year}"
+
+
 def _text(value):
     return escape(str(value)).replace("\n", "<br/>")
 
@@ -54,7 +65,7 @@ def _section_table(section, width):
     return table
 
 
-def build_pdf(report, data, notes, author):
+def build_pdf(report, data, notes, signer_name, signer_role="", issued_on=None):
     width = A4[0] - 36 * mm
     story = [Paragraph(_text(report.title), TITLE)]
     if data.subtitle:
@@ -83,7 +94,18 @@ def build_pdf(report, data, notes, author):
         else:
             story.append(Paragraph("Nenhum registro neste relatório.", BODY))
     story += _note_story(_note_blocks(notes, NOTES_AFTER))
-    story += [Spacer(1, 10), Paragraph(f"Elaborado por: {_text(author)}", CELL)]
+    issued_on = issued_on or timezone.localdate()
+    line = Table([[""]], colWidths=[width * 0.5], rowHeights=[22])
+    line.setStyle(TableStyle([("LINEBELOW", (0, 0), (-1, -1), 0.6, colors.HexColor("#444444"))]))
+    signature = [
+        Spacer(1, 14),
+        Paragraph(f"{_text(settings.CHURCH_CITY)}, {long_date(issued_on)}", CENTER),
+        line,
+        Paragraph(f"<b>{_text(signer_name)}</b>", CENTER),
+    ]
+    if signer_role:
+        signature.append(Paragraph(_text(signer_role), CENTER))
+    story.append(KeepTogether(signature))
     return _build(story)
 
 
@@ -93,7 +115,7 @@ def pdf_download(content, key):
     return response
 
 
-def csv_download(report, data, notes, key):
+def csv_download(report, data, notes, key, signer_name="", signer_role="", issued_on=None):
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = f'attachment; filename="relatorio-{key}.csv"'
     response.write("\ufeff")
@@ -116,4 +138,9 @@ def csv_download(report, data, notes, key):
         writer.writerow([])
         writer.writerow([label])
         writer.writerow([text])
+    writer.writerow([])
+    writer.writerow([f"{settings.CHURCH_CITY}, {long_date(issued_on or timezone.localdate())}"])
+    writer.writerow([signer_name])
+    if signer_role:
+        writer.writerow([signer_role])
     return response
