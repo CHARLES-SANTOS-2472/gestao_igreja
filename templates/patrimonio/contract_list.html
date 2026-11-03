@@ -3,8 +3,11 @@
 {% block content %}
 <div class="page-heading">
   <div><div class="eyebrow"><a class="back-link" href="{% url 'asset-list' %}">PATRIMÔNIO</a> / ADMINISTRAÇÃO</div><h1>Contratos</h1><p class="muted">Fornecedores, vigências e valores contratados.</p></div>
-  <div class="page-actions">{% if perms.patrimonio.view_supplier %}<a class="button button-secondary" href="{% url 'supplier-list' %}">Fornecedores</a>{% endif %}{% if can_add %}<a class="button button-primary" href="{% url 'contract-create' %}">+ Novo contrato</a>{% endif %}</div>
+  <div class="page-actions">{% if can_add %}<a class="button button-primary" href="{% url 'contract-create' %}">+ Novo contrato</a>{% endif %}</div>
 </div>
+  {% if perms.patrimonio.view_supplier %}<nav class="tile-nav" aria-label="Atalhos de contratos">
+    <a class="tile" href="{% url 'supplier-list' %}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 10h.01M15 10h.01"/></svg><span>Fornecedores</span></a>
+  </nav>{% endif %}
 {% if overdue_contract_count %}<div class="message error">{{ overdue_contract_count }} contrato(s) ativo(s) estão com a vigência vencida. Revise a situação e atualize o cadastro.</div>{% endif %}
 {% if expiring_contracts %}<section class="panel upcoming-panel">
   <div class="panel-heading"><div><h2>Vencimentos nos próximos 30 dias</h2><p class="muted">Revise os contratos e planeje renovações ou encerramentos.</p></div></div>

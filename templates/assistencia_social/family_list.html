@@ -3,8 +3,11 @@
 {% block content %}
 <div class="page-heading">
   <div><div class="eyebrow">ATENDIMENTO SOCIAL</div><h1>Famílias atendidas</h1><p class="muted">Cadastro restrito para organizar o acompanhamento e as ajudas sociais.</p></div>
-  <div class="page-actions">{% if perms.assistencia_social.view_assistancerecord %}<a class="button button-secondary" href="{% url 'assistance-list' %}">Histórico de ajudas</a>{% endif %}{% if can_add %}<a class="button button-primary" href="{% url 'assisted-family-create' %}">+ Nova família</a>{% endif %}</div>
+  <div class="page-actions">{% if can_add %}<a class="button button-primary" href="{% url 'assisted-family-create' %}">+ Nova família</a>{% endif %}</div>
 </div>
+  {% if perms.assistencia_social.view_assistancerecord %}<nav class="tile-nav" aria-label="Atalhos da assistência social">
+    <a class="tile" href="{% url 'assistance-list' %}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-8-5.3-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.7-8 11-8 11z"/></svg><span>Histórico de ajudas</span></a>
+  </nav>{% endif %}
 <section class="panel">
   <form method="get" class="filters">
     <div class="search-field"><label for="family-search">Buscar</label><input id="family-search" type="search" name="q" value="{{ search_query }}" placeholder="Identificação, contato, telefone, CEP ou cidade"></div>
