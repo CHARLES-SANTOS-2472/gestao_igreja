@@ -1,18 +1,18 @@
-{% load static %}
+﻿{% load static %}
 <!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#173b35">
-  <title>{% block title %}Gestão da Igreja{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261103-1">
+  <meta name="theme-color" content="#1e2934">
+  <title>{% block title %}GestÃ£o da Igreja{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261103-2">
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="{% url 'dashboard' %}">
-      <span class="brand-mark">G</span>
-      <span>Gestão<span class="brand-light"> da Igreja</span></span>
+      <span class="brand-mark"><img src="{% static 'img/logo.jpg' %}" alt="Comunidade FamÃ­lia da FÃ©"></span>
+      <span>Comunidade<span class="brand-light"> FamÃ­lia da FÃ©</span></span>
     </a>
     {% if user.is_authenticated %}
     <div class="user-menu">
@@ -28,8 +28,8 @@
   </header>
 
   {% if user.is_authenticated %}
-  <nav class="main-nav" aria-label="Navegação principal">
-    <a href="{% url 'dashboard' %}">Visão geral</a>
+  <nav class="main-nav" aria-label="NavegaÃ§Ã£o principal">
+    <a href="{% url 'dashboard' %}">VisÃ£o geral</a>
     {% if perms.membros.view_member %}
     <a href="{% url 'member-list' %}?group=members">Membros</a>
     <a href="{% url 'visitor-list' %}">Visitantes</a>
@@ -41,25 +41,25 @@
     <a href="{% url 'reservation-list' %}">Reservas</a>
     {% endif %}
     {% if perms.ministerios.view_department %}
-    <a href="{% url 'department-list' %}">Ministérios</a>
+    <a href="{% url 'department-list' %}">MinistÃ©rios</a>
     {% endif %}
     {% if perms.financeiro.view_financialtransaction %}
     <a href="{% url 'financial-dashboard' %}">Financeiro</a>
     {% endif %}
     {% if perms.financeiro.view_donationrecord and not perms.financeiro.view_financialtransaction %}
-    <a href="{% url 'donation-list' %}">Doações</a>
+    <a href="{% url 'donation-list' %}">DoaÃ§Ãµes</a>
     {% endif %}
     {% if perms.patrimonio.view_churchasset %}
-    <a href="{% url 'asset-list' %}">Patrimônio</a>
+    <a href="{% url 'asset-list' %}">PatrimÃ´nio</a>
     {% endif %}
     {% if perms.patrimonio.view_administrativetask %}
     <a href="{% url 'task-list' %}">Tarefas</a>
     {% endif %}
     {% if perms.assistencia_social.view_assistedfamily %}
-    <a href="{% url 'assisted-family-list' %}">Assistência social</a>
+    <a href="{% url 'assisted-family-list' %}">AssistÃªncia social</a>
     {% endif %}
     {% if can_manage_users %}
-    <a href="{% url 'user-list' %}">Usuários</a>
+    <a href="{% url 'user-list' %}">UsuÃ¡rios</a>
     {% endif %}
   </nav>
   {% endif %}
@@ -74,7 +74,7 @@
     {% endif %}
     {% block content %}{% endblock %}
   </main>
-  <footer class="footer">Gestão da Igreja <span>·</span> Acesso restrito a usuários autorizados</footer>
+  <footer class="footer">GestÃ£o da Igreja <span>Â·</span> Acesso restrito a usuÃ¡rios autorizados</footer>
   {% block extra_js %}{% endblock %}
 </body>
 </html>
