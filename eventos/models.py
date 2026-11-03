@@ -4,9 +4,11 @@ from django.db import models
 from django.db.models import F, Q
 
 from membros.models import Member
+from membros.photos import PhotoModelMixin, event_photo_path
 
 
-class ChurchEvent(models.Model):
+class ChurchEvent(PhotoModelMixin, models.Model):
+    photo = models.ImageField("cartaz do evento", upload_to=event_photo_path, blank=True)
     class Kind(models.TextChoices):
         SERVICE = "service", "Culto"
         CONGRESS = "congress", "Congresso"

@@ -2,9 +2,11 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from membros.models import Member
+from membros.photos import PhotoModelMixin, department_photo_path
 
 
-class Department(models.Model):
+class Department(PhotoModelMixin, models.Model):
+    photo = models.ImageField("imagem do ministério", upload_to=department_photo_path, blank=True)
     name = models.CharField("nome", max_length=120, unique=True)
     description = models.TextField("descrição", blank=True)
     leader = models.ForeignKey(

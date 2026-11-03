@@ -2,7 +2,7 @@
 {% block title %}{{ department.name }} · Ministérios{% endblock %}
 {% block content %}
 <div class="page-heading">
-  <div><div class="eyebrow"><a class="back-link" href="{% url 'department-list' %}">MINISTÉRIOS</a> / DEPARTAMENTO</div><h1>{{ department.name }}</h1><p class="muted">{% if department.active %}Ativo{% else %}Inativo{% endif %}</p></div>
+  <div class="heading-with-photo">{% if department.photo %}<img class="avatar avatar-lg avatar-square" src="{{ department.photo.url }}" alt="Imagem de {{ department.name }}">{% endif %}<div><div class="eyebrow"><a class="back-link" href="{% url 'department-list' %}">MINISTÉRIOS</a> / DEPARTAMENTO</div><h1>{{ department.name }}</h1><p class="muted">{% if department.active %}Ativo{% else %}Inativo{% endif %}</p></div></div>
   {% if perms.ministerios.change_department %}<a class="button button-primary" href="{% url 'department-update' department.pk %}">Editar departamento</a>{% endif %}
 </div>
 <section class="panel">

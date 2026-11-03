@@ -16,7 +16,7 @@
   {% if events %}
   <div class="table-wrap"><table><thead><tr><th>Evento</th><th>Data e horário</th><th>Tipo</th><th>Situação</th><th>Inscritos</th><th></th></tr></thead><tbody>
     {% for event in events %}<tr>
-      <td><a class="person-link" href="{% url 'event-detail' event.pk %}">{{ event.title }}</a><span class="subline">{{ event.location|default:"Local a definir" }}</span></td>
+      <td><a class="person-link person-with-photo" href="{% url 'event-detail' event.pk %}">{% if event.photo %}<img class="avatar avatar-sm avatar-square" src="{{ event.photo.url }}" alt="" loading="lazy">{% endif %}<span>{{ event.title }}</span></a><span class="subline">{{ event.location|default:"Local a definir" }}</span></td>
       <td>{{ event.starts_at|date:"d/m/Y · H:i" }}<span class="subline">até {{ event.ends_at|date:"d/m/Y · H:i" }}</span></td>
       <td>{{ event.get_kind_display }}</td>
       <td><span class="status-pill {% if event.status == 'cancelled' %}status-cancelled{% elif event.status == 'draft' %}status-draft{% endif %}">{{ event.get_status_display }}</span></td>

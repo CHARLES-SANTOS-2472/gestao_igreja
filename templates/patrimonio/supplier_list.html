@@ -14,7 +14,7 @@
   </form>
   {% if suppliers %}<div class="table-wrap"><table><thead><tr><th>Fornecedor</th><th>CNPJ</th><th>Contato</th><th>Telefone / e-mail</th><th>Situação</th><th></th></tr></thead><tbody>
     {% for supplier in suppliers %}<tr>
-      <td>{{ supplier.name }}</td><td>{{ supplier.cnpj|default:"—" }}</td><td>{{ supplier.contact_name|default:"—" }}</td>
+      <td>{% if supplier.photo %}<span class="person-with-photo"><img class="avatar avatar-sm avatar-square" src="{{ supplier.photo.url }}" alt="" loading="lazy"><span>{{ supplier.name }}</span></span>{% else %}{{ supplier.name }}{% endif %}</td><td>{{ supplier.cnpj|default:"—" }}</td><td>{{ supplier.contact_name|default:"—" }}</td>
       <td>{{ supplier.phone|default:"—" }}{% if supplier.email %}<span class="subline">{{ supplier.email }}</span>{% endif %}</td>
       <td>{% if supplier.active %}Ativo{% else %}Inativo{% endif %}</td>
       <td>{% if perms.patrimonio.change_supplier %}<a class="text-link" href="{% url 'supplier-update' supplier.pk %}">Editar</a>{% endif %}</td>

@@ -13,7 +13,9 @@ class ChurchMessageForm(forms.ModelForm):
         widgets = {"text": forms.Textarea(attrs={"rows": 6, "maxlength": 1200})}
 
 
-class MessageOccasionForm(forms.ModelForm):
+class MessageOccasionForm(PhotoFormMixin, forms.ModelForm):
+    photo_label = "Imagem da ocasião"
+    remove_photo_label = "Remover a imagem atual"
     month = forms.TypedChoiceField(
         label="Mês", coerce=int,
         choices=[(i + 1, name.capitalize()) for i, name in enumerate(MessageOccasion.MONTH_NAMES)],
@@ -21,7 +23,7 @@ class MessageOccasionForm(forms.ModelForm):
 
     class Meta:
         model = MessageOccasion
-        fields = ("name", "month", "day", "nth_sunday", "ai_guidance", "whatsapp_template_name", "active")
+        fields = ("photo", "name", "month", "day", "nth_sunday", "ai_guidance", "whatsapp_template_name", "active")
         widgets = {
             "ai_guidance": forms.Textarea(attrs={"rows": 3}),
             "day": forms.NumberInput(attrs={"min": 1, "max": 31}),

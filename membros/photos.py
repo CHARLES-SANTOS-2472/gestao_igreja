@@ -24,6 +24,22 @@ def asset_photo_path(instance, filename):
     return f"patrimonio/{uuid.uuid4().hex}.jpg"
 
 
+def department_photo_path(instance, filename):
+    return f"ministerios/{uuid.uuid4().hex}.jpg"
+
+
+def event_photo_path(instance, filename):
+    return f"eventos/{uuid.uuid4().hex}.jpg"
+
+
+def occasion_photo_path(instance, filename):
+    return f"ocasioes/{uuid.uuid4().hex}.jpg"
+
+
+def supplier_photo_path(instance, filename):
+    return f"fornecedores/{uuid.uuid4().hex}.jpg"
+
+
 class PhotoField(forms.ImageField):
     """Valida e regrava a imagem em JPEG reduzido, descartando EXIF (inclusive GPS)."""
 
@@ -59,6 +75,15 @@ class PhotoFormMixin(forms.ModelForm):
         help_text="No celular, escolha entre tirar uma foto agora ou anexar uma da galeria.",
     )
     remove_photo = forms.BooleanField(label="Remover a foto atual", required=False)
+    photo_label = None
+    remove_photo_label = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.photo_label:
+            self.fields["photo"].label = self.photo_label
+        if self.remove_photo_label:
+            self.fields["remove_photo"].label = self.remove_photo_label
 
     def clean(self):
         cleaned_data = super().clean()
@@ -90,6 +115,10 @@ class PhotoModelMixin:
 MEDIA_PERMISSIONS = {
     "membros": "membros.view_member",
     "patrimonio": "patrimonio.view_churchasset",
+    "ministerios": "ministerios.view_department",
+    "eventos": "eventos.view_churchevent",
+    "ocasioes": "membros.view_messageoccasion",
+    "fornecedores": "patrimonio.view_supplier",
 }
 
 

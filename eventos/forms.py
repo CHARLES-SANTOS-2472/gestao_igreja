@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 from membros.models import Member
+from membros.photos import PhotoFormMixin
 
 from .models import (
     ChurchEvent,
@@ -14,10 +15,14 @@ from .models import (
 )
 
 
-class EventForm(forms.ModelForm):
+class EventForm(PhotoFormMixin, forms.ModelForm):
+    photo_label = "Cartaz do evento"
+    remove_photo_label = "Remover o cartaz atual"
+
     class Meta:
         model = ChurchEvent
         fields = (
+            "photo",
             "title",
             "kind",
             "status",

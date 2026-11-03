@@ -14,7 +14,7 @@ from pathlib import Path
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 from membros.models import MessageOccasion, Member
 
@@ -129,10 +129,21 @@ def _wrap(draw, text, font, width):
     return lines
 
 
-def build_banner(title, text, verse, reference):
-    """Banner quadrado (1080 px) com a logo, a mensagem e o versículo. Retorna bytes PNG."""
+def build_banner(title, text, verse, reference, background=None):
+    """Banner quadrado (1080 px) com a logo, a mensagem e o versículo. Retorna bytes PNG.
+
+    `background` é o caminho de uma imagem (ex.: a da ocasião), usada ao fundo, escurecida.
+    """
     size = 1080
     image = Image.new("RGB", (size, size), SLATE)
+    if background:
+        try:
+            with Image.open(background) as bg:
+                bg = ImageOps.fit(bg.convert("RGB"), (size, size - 262))
+            overlay = Image.new("RGB", bg.size, SLATE)
+            image.paste(Image.blend(bg, overlay, 0.72), (0, 262))
+        except (OSError, ValueError):
+            pass  # sem a imagem, segue com o fundo liso
     draw = ImageDraw.Draw(image)
     draw.rectangle((0, 0, size, 250), fill=WHITE)
     draw.rectangle((0, 250, size, 262), fill=RED)
@@ -267,7 +278,8 @@ def deliver(member, channel, kind, reference_date, occasion=None, live=None):
         title = TITLES[kind].format(
             name=member.first_name, occasion=occasion.name if occasion else ""
         )
-        png = build_banner(title, text, verse, reference)
+        background = occasion.photo.path if occasion and occasion.photo else None
+        png = build_banner(title, text, verse, reference, background)
         verse_line = f"“{verse}” — {reference}"
         folder = Path(settings.MEDIA_ROOT) / "mensagens" / reference_date.isoformat()
         folder.mkdir(parents=True, exist_ok=True)

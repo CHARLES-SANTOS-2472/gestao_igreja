@@ -2,7 +2,7 @@
 {% block title %}{{ event.title }} · Agenda{% endblock %}
 {% block content %}
 <div class="page-heading">
-  <div><div class="eyebrow"><a class="back-link" href="{% url 'event-list' %}">AGENDA</a> / DETALHES</div><h1>{{ event.title }}</h1><p class="muted"><span class="status-pill {% if event.status == 'cancelled' %}status-cancelled{% elif event.status == 'draft' %}status-draft{% endif %}">{{ event.get_status_display }}</span> <span class="event-kind">{{ event.get_kind_display }}</span></p></div>
+  <div class="heading-with-photo">{% if event.photo %}<img class="avatar avatar-lg avatar-square" src="{{ event.photo.url }}" alt="Cartaz de {{ event.title }}">{% endif %}<div><div class="eyebrow"><a class="back-link" href="{% url 'event-list' %}">AGENDA</a> / DETALHES</div><h1>{{ event.title }}</h1><p class="muted"><span class="status-pill {% if event.status == 'cancelled' %}status-cancelled{% elif event.status == 'draft' %}status-draft{% endif %}">{{ event.get_status_display }}</span> <span class="event-kind">{{ event.get_kind_display }}</span></p></div></div>
   {% if perms.eventos.change_churchevent %}<a class="button button-secondary" href="{% url 'event-update' event.pk %}">Editar evento</a>{% endif %}
 </div>
 <section class="event-hero panel">

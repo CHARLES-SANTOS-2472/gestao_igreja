@@ -16,7 +16,7 @@
   {% if departments %}
   <div class="table-wrap"><table><thead><tr><th>Departamento</th><th>Liderança</th><th>Membros</th><th>Situação</th><th></th></tr></thead><tbody>
     {% for department in departments %}<tr>
-      <td><a class="person-link" href="{% url 'department-detail' department.pk %}">{{ department.name }}</a>{% if department.description %}<span class="subline department-description">{{ department.description }}</span>{% endif %}</td>
+      <td><a class="person-link person-with-photo" href="{% url 'department-detail' department.pk %}">{% if department.photo %}<img class="avatar avatar-sm avatar-square" src="{{ department.photo.url }}" alt="" loading="lazy">{% endif %}<span>{{ department.name }}</span></a>{% if department.description %}<span class="subline department-description">{{ department.description }}</span>{% endif %}</td>
       <td>{% if department.leader %}{{ department.leader }}{% else %}—{% endif %}{% if department.vice_leader %}<span class="subline">Vice-líder: {{ department.vice_leader }}</span>{% endif %}</td>
       <td>{{ department.member_count }}</td>
       <td><span class="status-pill {% if not department.active %}status-draft{% endif %}">{% if department.active %}Ativo{% else %}Inativo{% endif %}</span></td>

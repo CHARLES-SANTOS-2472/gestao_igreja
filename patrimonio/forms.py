@@ -56,7 +56,9 @@ class AssetMaintenanceForm(forms.ModelForm):
         }
 
 
-class SupplierForm(forms.ModelForm):
+class SupplierForm(PhotoFormMixin, forms.ModelForm):
+    photo_label = "Logotipo"
+    remove_photo_label = "Remover o logotipo atual"
     cnpj = forms.CharField(
         label="CNPJ",
         required=False,
@@ -68,7 +70,7 @@ class SupplierForm(forms.ModelForm):
 
     class Meta:
         model = Supplier
-        fields = ("name", "cnpj", "contact_name", "phone", "email", "notes", "active")
+        fields = ("photo", "name", "cnpj", "contact_name", "phone", "email", "notes", "active")
         widgets = {"notes": forms.Textarea(attrs={"rows": 4})}
 
     def clean_cnpj(self):

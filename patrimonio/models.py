@@ -4,7 +4,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
 
-from membros.photos import PhotoModelMixin, asset_photo_path
+from membros.photos import PhotoModelMixin, asset_photo_path, supplier_photo_path
 
 
 class ChurchAsset(PhotoModelMixin, models.Model):
@@ -108,7 +108,8 @@ class AssetMaintenance(models.Model):
             )
 
 
-class Supplier(models.Model):
+class Supplier(PhotoModelMixin, models.Model):
+    photo = models.ImageField("logotipo", upload_to=supplier_photo_path, blank=True)
     name = models.CharField("nome / razão social", max_length=180)
     cnpj = models.CharField("CNPJ", max_length=14, blank=True)
     contact_name = models.CharField("pessoa de contato", max_length=160, blank=True)

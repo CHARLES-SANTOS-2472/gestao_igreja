@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import F, Q
 from django.utils import timezone
 
-from .photos import PhotoModelMixin, member_photo_path
+from .photos import PhotoModelMixin, member_photo_path, occasion_photo_path
 
 class CboOccupation(models.Model):
     code = models.CharField("código CBO", max_length=6, primary_key=True)
@@ -20,7 +20,8 @@ class CboOccupation(models.Model):
         return f"{self.code} — {self.title}"
 
 
-class MessageOccasion(models.Model):
+class MessageOccasion(PhotoModelMixin, models.Model):
+    photo = models.ImageField("imagem da ocasião", upload_to=occasion_photo_path, blank=True)
     SUNDAY_CHOICES = [(1, "1º domingo"), (2, "2º domingo"), (3, "3º domingo"), (4, "4º domingo")]
     MONTH_NAMES = [
         "janeiro", "fevereiro", "março", "abril", "maio", "junho",

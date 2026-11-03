@@ -4,6 +4,7 @@ from django.db import transaction
 from django.db.models import Q
 
 from membros.models import Member
+from membros.photos import PhotoFormMixin
 
 from .models import (
     Department,
@@ -14,7 +15,9 @@ from .models import (
 )
 
 
-class DepartmentForm(forms.ModelForm):
+class DepartmentForm(PhotoFormMixin, forms.ModelForm):
+    photo_label = "Imagem do ministério"
+    remove_photo_label = "Remover a imagem atual"
     participants = forms.ModelMultipleChoiceField(
         label="Participantes",
         queryset=Member.objects.none(),
@@ -28,7 +31,7 @@ class DepartmentForm(forms.ModelForm):
 
     class Meta:
         model = Department
-        fields = ("name", "description", "leader", "vice_leader", "active")
+        fields = ("photo", "name", "description", "leader", "vice_leader", "active")
         widgets = {
             "description": forms.Textarea(attrs={"rows": 4}),
         }
