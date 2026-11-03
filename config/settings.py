@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "membros",
+    "comunicacao",
     "eventos",
     "ministerios",
     "financeiro",
@@ -144,6 +145,20 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Gestão da Igreja <nao-responder@igreja.local>")
 PASSWORD_RESET_TIMEOUT = 300
+
+# Mensagens automáticas (app comunicacao). Sem MESSAGING_LIVE=1 tudo é apenas simulado.
+MESSAGING_LIVE = os.environ.get("MESSAGING_LIVE", "0") == "1"
+CHURCH_SIGNATURE = os.environ.get("CHURCH_SIGNATURE", "Pastores da Comunidade Família da Fé")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN", "")
+WHATSAPP_PHONE_ID = os.environ.get("WHATSAPP_PHONE_ID", "")
+WHATSAPP_API_VERSION = os.environ.get("WHATSAPP_API_VERSION", "v20.0")
+WHATSAPP_TEMPLATES = {
+    "welcome": os.environ.get("WHATSAPP_TEMPLATE_WELCOME", ""),
+    "birthday": os.environ.get("WHATSAPP_TEMPLATE_BIRTHDAY", ""),
+    "daily": os.environ.get("WHATSAPP_TEMPLATE_DAILY", ""),
+}
 LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
 

@@ -84,3 +84,14 @@ Para produção, defina `DJANGO_ALLOWED_HOSTS` como uma lista separada por vírg
 ## Recuperação de senha
 
 Na tela de login, **Esqueci minha senha** envia um link (válido por 5 minutos) ao e-mail cadastrado no usuário. Sem SMTP configurado, o e-mail é exibido apenas no terminal do servidor. Para envio real, copie `.env.example` para `.env` (ignorado pelo Git) e preencha, ou defina EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend, EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD e DEFAULT_FROM_EMAIL.
+
+
+## Mensagens automáticas (e-mail e WhatsApp)
+
+O app `comunicacao` envia boas-vindas após o cadastro, felicitações de aniversário, mensagens das ocasiões cadastradas (admin > Ocasiões de mensagens) e a mensagem diária, sempre com banner (logo, texto e versículo) e só para quem autorizou o contato. Cada envio fica registrado em admin > Mensagens enviadas e não se repete no mesmo dia.
+
+- Rotina das 7h: `python manage.py enviar_mensagens` (use `--dry-run` para simular e `--date AAAA-MM-DD` para testar outra data). Agende no servidor (cron/Agendador de Tarefas).
+- Por padrão tudo é **simulação**: nada é enviado. Para enviar de verdade, defina `MESSAGING_LIVE=1`.
+- IA: com `OPENAI_API_KEY` o texto é gerado pela OpenAI; sem ela, usa-se um modelo próprio. Os versículos vêm de uma lista fixa (a IA não escolhe versículos).
+- WhatsApp (Meta Cloud API): `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` e modelos aprovados (`WHATSAPP_TEMPLATE_WELCOME/BIRTHDAY/DAILY`, ou o campo da ocasião). O envio de imagem pelo WhatsApp ainda não está implementado; vai só o texto.
+- Assinatura: coloque a imagem em `static/img/assinatura.png` (fundo transparente) e ajuste `CHURCH_SIGNATURE`.
