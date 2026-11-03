@@ -724,7 +724,7 @@ class MemberManagementTests(TestCase):
         self.assertContains(response, "Visão geral da igreja")
         self.assertContains(response, "Abrir cadastro de pessoas")
         self.assertContains(response, reverse("member-list"))
-        self.assertContains(response, "Mensagem da igreja")
+        self.assertContains(response, "Isaías 43: 18-19")
         self.assertContains(response, "img/logo.jpg")
         self.assertNotContains(response, "Cadastros recentes")
         self.assertNotContains(response, "Pessoa Reservada")

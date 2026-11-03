@@ -9,7 +9,8 @@
     <p>Indicadores de todos os módulos em um só lugar. Use os botões dos gráficos para entrar em cada área.</p>
     <div class="overview-message-slot">
       <span class="overview-message-mark" aria-hidden="true">“</span>
-      <div><strong>{{ church_message.title }}</strong><span class="overview-message-text">{{ church_message.text|linebreaksbr }}</span>{% if church_message.reference %}<span class="overview-message-ref">{{ church_message.reference }}</span>{% endif %}{% if perms.membros.change_churchmessage %}<a class="text-link overview-message-edit" href="{% url 'church-message-update' %}">Editar mensagem</a>{% endif %}</div>
+      <div><span class="overview-message-text">{{ church_message.text|linebreaksbr }}</span>{% if church_message.reference %}<em class="overview-message-ref">{{ church_message.reference }}</em>{% endif %}</div>
+      {% if perms.membros.change_churchmessage %}<a class="overview-message-edit" href="{% url 'church-message-update' %}">Editar mensagem</a>{% endif %}
     </div>
   </div>
   <div class="overview-image-slot overview-logo-slot">

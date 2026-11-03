@@ -69,5 +69,5 @@ admin.site.index_title = "Administração do sistema"
 
 @admin.register(ChurchMessage)
 class ChurchMessageAdmin(admin.ModelAdmin):
-    list_display = ("title", "reference", "updated_at")
+    list_display = ("reference", "updated_at")
 

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Mensagem da igreja · Gestão da Igreja{% endblock %}
 {% block content %}
-<div class="page-heading"><div><div class="eyebrow"><a class="back-link" href="{% url 'dashboard' %}">VISÃO GERAL</a> / MENSAGEM</div><h1>Mensagem da igreja</h1><p class="muted">O texto aparece na página inicial para todos os usuários.</p></div></div>
+<div class="page-heading"><div><div class="eyebrow"><a class="back-link" href="{% url 'dashboard' %}">VISÃO GERAL</a> / MENSAGEM</div><h1>Editar mensagem</h1><p class="muted">O texto e a referência aparecem na página inicial para todos os usuários.</p></div></div>
 <form method="post" class="panel form-panel">
   {% csrf_token %}
   {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}

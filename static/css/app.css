@@ -465,7 +465,10 @@ input:focus, select:focus, textarea:focus { outline: 3px solid #dce3eb; border-c
 .photo-controls { display: grid; flex: 1; gap: 6px; min-width: 220px; }
 
 /* Mensagem da igreja */
-.overview-message-slot > div { display: grid; gap: 4px; }
+.overview-message-slot > div { display: grid; flex: 1; gap: 6px; }
 .overview-message-text { font-family: Georgia, serif; font-size: 15px; font-style: italic; line-height: 1.55; color: #2b3946; }
-.overview-message-ref { font-size: 12px; font-weight: 700; color: var(--red-dark); }
-.overview-message-edit { justify-self: start; font-size: 12px; }
+.overview-message-ref { justify-self: end; font-family: Georgia, serif; font-size: 13px; font-style: italic; font-weight: 600; color: var(--red-dark); }
+.overview-message-slot { position: relative; }
+.overview-message-edit { position: absolute; top: 8px; right: 10px; padding: 3px 11px; border: 1px solid var(--line); border-radius: 99px; background: #ffffff80; color: var(--muted); font-size: 11px; text-decoration: none; opacity: .18; transition: opacity .2s ease, background .2s ease, color .2s ease; }
+.overview-message-slot:hover .overview-message-edit, .overview-message-edit:focus-visible { opacity: 1; }
+.overview-message-edit:hover, .overview-message-edit:focus-visible { background: var(--red); border-color: var(--red); color: #fff; }
