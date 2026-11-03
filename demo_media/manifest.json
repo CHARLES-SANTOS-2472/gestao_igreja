@@ -1,0 +1,48 @@
+[
+  {
+    "kind": "pessoa",
+    "lookup": {
+      "first_name": "CHARLES",
+      "last_name": "DA SILVA SANTOS"
+    },
+    "extra": {
+      "status": "member",
+      "is_placeholder": false
+    },
+    "file": "pessoa-1.jpg"
+  },
+  {
+    "kind": "pessoa",
+    "lookup": {
+      "first_name": "SILVANA",
+      "last_name": "DA SILVA SANTOS"
+    },
+    "extra": {
+      "status": "pending",
+      "is_placeholder": true
+    },
+    "file": "pessoa-2.jpg"
+  },
+  {
+    "kind": "ministerio",
+    "lookup": {
+      "name": "Ministério Infantil"
+    },
+    "extra": {
+      "description": "\"Ensina a criança no caminho em que deve andar, e, ainda quando for velha, não se desviará dele.\"\r\nProvérbios 22:6"
+    },
+    "file": "ministerio-1.jpg"
+  },
+  {
+    "kind": "bem",
+    "lookup": {
+      "name": "Teclado Musical Yamaha Psr-e483"
+    },
+    "extra": {
+      "category": "instrument",
+      "location": "Púlpito",
+      "description": "Teclado é da sede da igreja."
+    },
+    "file": "bem-1.jpg"
+  }
+]

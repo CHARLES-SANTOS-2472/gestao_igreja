@@ -99,3 +99,7 @@ O app `comunicacao` envia boas-vindas após o cadastro, felicitações de aniver
 ## Dados de demonstração
 
 `python manage.py carregar_demo` cria ministérios, eventos, um fornecedor e três pessoas **fictícias** (todos com "(demonstração)" no nome), gera imagens nas cores da igreja e coloca uma imagem em cada ocasião padrão. Pode ser executado mais de uma vez sem duplicar. `python manage.py carregar_demo --limpar` remove apenas o que ele criou. As imagens ficam em `media/`, então o comando precisa rodar no próprio ambiente da apresentação (por exemplo, no Codespace).
+
+## Levar as imagens já carregadas para outro ambiente
+
+As imagens ficam em `media/` (fora do Git). Para levá-las ao Codespace, `python manage.py imagens_demo --exportar` copia as imagens do banco atual para `demo_media/` (versionada, com um `manifest.json`); depois de `git push`, no outro ambiente rode `git pull` e `python manage.py imagens_demo`. O comando recria o cadastro pelo nome (se ainda não existir) e anexa a imagem; pode ser repetido. Use `--forcar` para trocar imagens que já existam (por exemplo, as geradas por `carregar_demo`). Atenção: `demo_media/` inclui fotos de pessoas; mantenha o repositório privado.
