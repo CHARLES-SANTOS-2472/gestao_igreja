@@ -37,6 +37,7 @@ def _note_story(blocks):
 MONTHS = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
           "agosto", "setembro", "outubro", "novembro", "dezembro"]
 CENTER = ParagraphStyle("center", parent=CELL, alignment=1)
+CENTER_BOLD = ParagraphStyle("centerbold", parent=CENTER, fontName="ChurchSans-Bold")
 
 
 def long_date(value):
@@ -95,13 +96,14 @@ def build_pdf(report, data, notes, signer_name, signer_role="", issued_on=None):
             story.append(Paragraph("Nenhum registro neste relatório.", BODY))
     story += _note_story(_note_blocks(notes, NOTES_AFTER))
     issued_on = issued_on or timezone.localdate()
-    line = Table([[""]], colWidths=[width * 0.5], rowHeights=[22])
+    line = Table([[""]], colWidths=[width * 0.5], rowHeights=[56])
     line.setStyle(TableStyle([("LINEBELOW", (0, 0), (-1, -1), 0.6, colors.HexColor("#444444"))]))
     signature = [
         Spacer(1, 14),
         Paragraph(f"{_text(settings.CHURCH_CITY)}, {long_date(issued_on)}", CENTER),
         line,
-        Paragraph(f"<b>{_text(signer_name)}</b>", CENTER),
+        Spacer(1, 6),
+        Paragraph(_text(signer_name), CENTER_BOLD),
     ]
     if signer_role:
         signature.append(Paragraph(_text(signer_role), CENTER))
