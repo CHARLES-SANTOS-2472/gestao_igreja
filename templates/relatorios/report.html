@@ -16,15 +16,17 @@
       <button class="button button-secondary" type="submit" name="acao" value="preview">Atualizar pré-visualização</button>
     </div>
     <div class="notes-grid">
-      <div><label for="{{ form.considerations.id_for_label }}">Considerações</label>{{ form.considerations }}</div>
-      <div><label for="{{ form.observations.id_for_label }}">Observações</label>{{ form.observations }}</div>
-      <div><label for="{{ form.needs.id_for_label }}">Necessidades e sugestões</label>{{ form.needs }}</div>
+      {% for field in form.visible_fields %}{% if field.name in note_names %}
+      <div><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}<span class="muted">{{ field.help_text }}</span></div>
+      {% endif %}{% endfor %}
     </div>
-    <p class="muted">Esses textos aparecem no final do relatório e não ficam salvos no sistema.</p>
+    <p class="muted">Os textos entram no relatório (Introdução e Desenvolvimento antes dos dados; Conclusão e Recomendações depois) e não ficam salvos no sistema.</p>
   </section>
 
   <section class="panel upcoming-panel report-preview">
     <div class="panel-heading"><div><h2>Pré-visualização</h2>{% if data.subtitle %}<p class="muted">{{ data.subtitle }}</p>{% endif %}</div></div>
+    {% if form.introduction.value %}<h3 class="report-section-title">Introdução</h3><p class="report-note">{{ form.introduction.value|linebreaksbr }}</p>{% endif %}
+    {% if form.development.value %}<h3 class="report-section-title">Desenvolvimento</h3><p class="report-note">{{ form.development.value|linebreaksbr }}</p>{% endif %}
     {% if data.summary %}<div class="stats-grid">{% for label, value in data.summary %}<article class="stat-card"><span class="stat-label">{{ label }}</span><strong>{{ value }}</strong></article>{% endfor %}</div>{% endif %}
     {% for section in data.sections %}
     <h3 class="report-section-title">{{ section.title }}</h3>
@@ -32,9 +34,8 @@
       {% for row in section.rows %}<tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>{% endfor %}
     </tbody></table></div>{% else %}<div class="empty-compact">Nenhum registro neste relatório.</div>{% endif %}
     {% endfor %}
-    {% if form.considerations.value %}<h3 class="report-section-title">Considerações</h3><p class="report-note">{{ form.considerations.value|linebreaksbr }}</p>{% endif %}
-    {% if form.observations.value %}<h3 class="report-section-title">Observações</h3><p class="report-note">{{ form.observations.value|linebreaksbr }}</p>{% endif %}
-    {% if form.needs.value %}<h3 class="report-section-title">Necessidades e sugestões</h3><p class="report-note">{{ form.needs.value|linebreaksbr }}</p>{% endif %}
+    {% if form.conclusion.value %}<h3 class="report-section-title">Conclusão e considerações</h3><p class="report-note">{{ form.conclusion.value|linebreaksbr }}</p>{% endif %}
+    {% if form.recommendations.value %}<h3 class="report-section-title">Recomendações finais</h3><p class="report-note">{{ form.recommendations.value|linebreaksbr }}</p>{% endif %}
   </section>
 
   <div class="form-actions">

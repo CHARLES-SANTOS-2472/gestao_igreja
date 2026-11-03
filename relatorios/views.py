@@ -7,19 +7,29 @@ from django.views.generic import TemplateView
 
 from ministerios.models import Department
 
-from .pdf import build_pdf, csv_download, pdf_download
+from .pdf import NOTE_KEYS, build_pdf, csv_download, pdf_download
 from .registry import BY_KEY, REPORTS, default_period
 
 
 class ReportForm(forms.Form):
     date_from = forms.DateField(label="Data inicial", required=False, widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"))
     date_to = forms.DateField(label="Data final", required=False, widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"))
-    considerations = forms.CharField(label="Considerações", required=False, max_length=3000,
-                                     widget=forms.Textarea(attrs={"rows": 3}))
-    observations = forms.CharField(label="Observações", required=False, max_length=3000,
-                                   widget=forms.Textarea(attrs={"rows": 3}))
-    needs = forms.CharField(label="Necessidades e sugestões", required=False, max_length=3000,
-                            widget=forms.Textarea(attrs={"rows": 3}))
+    introduction = forms.CharField(
+        label="1. Introdução", required=False, max_length=5000,
+        help_text="Apresente o objetivo do relatório, o período e o contexto.",
+        widget=forms.Textarea(attrs={"rows": 4, "placeholder": "Ex.: Este relatório apresenta as atividades do período..."}))
+    development = forms.CharField(
+        label="2. Desenvolvimento", required=False, max_length=5000,
+        help_text="Descreva o que foi feito, resultados, fatos e observações. Os dados do sistema vêm logo depois.",
+        widget=forms.Textarea(attrs={"rows": 6, "placeholder": "Ex.: Durante o período realizamos..."}))
+    conclusion = forms.CharField(
+        label="3. Conclusão e considerações", required=False, max_length=5000,
+        help_text="Faça a análise geral: pontos positivos, dificuldades e o balanço do período.",
+        widget=forms.Textarea(attrs={"rows": 4, "placeholder": "Ex.: Concluímos que..."}))
+    recommendations = forms.CharField(
+        label="4. Recomendações finais", required=False, max_length=5000,
+        help_text="Liste necessidades, sugestões e próximos passos.",
+        widget=forms.Textarea(attrs={"rows": 4, "placeholder": "Ex.: Recomendamos... Necessitamos de..."}))
 
     def clean(self):
         cleaned = super().clean()
@@ -88,7 +98,7 @@ class ReportView(LoginRequiredMixin, TemplateView):
         title = self.report.title if not self.obj else f"{self.report.title}: {self.obj.name}"
         return self.render_to_response({
             "report": self.report, "title": title, "form": form, "data": self._data(params),
-            "has_period": bool(self.report.period), "obj": self.obj,
+            "has_period": bool(self.report.period), "obj": self.obj, "note_names": NOTE_KEYS,
         })
 
     def get(self, request, *args, **kwargs):
@@ -100,7 +110,7 @@ class ReportView(LoginRequiredMixin, TemplateView):
         if action in ("pdf", "csv") and form.is_valid():
             params = self._params(form)
             data = self._data(params)
-            notes = {k: form.cleaned_data[k] for k in ("considerations", "observations", "needs")}
+            notes = {k: form.cleaned_data[k] for k in NOTE_KEYS}
             key = self.report.key if not self.obj else f"{self.report.key}-{self.obj.pk}"
             if action == "csv":
                 return csv_download(self.report, data, notes, key)

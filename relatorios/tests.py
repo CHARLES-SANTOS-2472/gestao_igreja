@@ -34,15 +34,20 @@ class ReportTests(TestCase):
             url = reverse("report-scoped" if report.scoped else "report", args=args)
             self.assertEqual(self.client.get(url).status_code, 200, report.key)
             for action, kind in (("pdf", "application/pdf"), ("csv", "text/csv")):
-                response = self.client.post(url, {"acao": action, "needs": "Comprar cadeiras"})
+                response = self.client.post(url, {"acao": action, "recommendations": "Comprar cadeiras", "introduction": "Intro"})
                 self.assertEqual(response.status_code, 200, report.key)
                 self.assertIn(kind, response["Content-Type"], report.key)
 
     def test_preview_shows_notes_and_pdf_contains_them(self):
         url = reverse("report", args=["membros"])
-        response = self.client.post(url, {"acao": "preview", "considerations": "Ano abençoado"})
-        self.assertContains(response, "Ano abençoado")
+        response = self.client.post(url, {
+            "acao": "preview", "introduction": "Ano abençoado", "development": "Fizemos cultos",
+            "conclusion": "Balanço positivo", "recommendations": "Reformar o salão"})
+        for text in ("Ano abençoado", "Fizemos cultos", "Balanço positivo", "Reformar o salão"):
+            self.assertContains(response, text)
         self.assertContains(response, "Pré-visualização")
+        html = response.content.decode()
+        self.assertLess(html.index("Fizemos cultos"), html.index("Balanço positivo"))
 
     def test_invalid_period_stays_on_page(self):
         url = reverse("report", args=["eventos"])
@@ -70,5 +75,5 @@ class ReportTests(TestCase):
 
     def test_html_in_notes_is_escaped_in_preview(self):
         url = reverse("report", args=["membros"])
-        response = self.client.post(url, {"acao": "preview", "needs": "<script>alert(1)</script>"})
+        response = self.client.post(url, {"acao": "preview", "conclusion": "<script>alert(1)</script>"})
         self.assertNotContains(response, "<script>alert(1)</script>")

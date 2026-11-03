@@ -13,11 +13,23 @@ from financeiro.pdf import BODY, CELL, H2, LIGHT, RED, SLATE, TITLE, _build
 HEAD = ParagraphStyle("head", parent=CELL, fontName="ChurchSans-Bold", textColor=colors.white)
 RIGHT = ParagraphStyle("right", parent=CELL, alignment=2)
 RIGHT_HEAD = ParagraphStyle("righthead", parent=HEAD, alignment=2)
-NOTE_LABELS = (
-    ("considerations", "Considerações"),
-    ("observations", "Observações"),
-    ("needs", "Necessidades e sugestões"),
+NOTES_BEFORE = (
+    ("introduction", "Introdução"),
+    ("development", "Desenvolvimento"),
 )
+NOTES_AFTER = (
+    ("conclusion", "Conclusão e considerações"),
+    ("recommendations", "Recomendações finais"),
+)
+NOTE_KEYS = tuple(k for k, _ in NOTES_BEFORE + NOTES_AFTER)
+
+
+def _note_blocks(notes, items):
+    return [(label, notes.get(key, "").strip()) for key, label in items if notes.get(key, "").strip()]
+
+
+def _note_story(blocks):
+    return [KeepTogether([Paragraph(label, H2), Paragraph(_text(text), BODY)]) for label, text in blocks]
 
 
 def _text(value):
@@ -47,6 +59,7 @@ def build_pdf(report, data, notes, author):
     story = [Paragraph(_text(report.title), TITLE)]
     if data.subtitle:
         story.append(Paragraph(_text(data.subtitle), BODY))
+    story += _note_story(_note_blocks(notes, NOTES_BEFORE))
     if data.summary:
         story.append(Spacer(1, 6))
         cells = [[Paragraph(f"<b>{_text(label)}</b><br/>{_text(value)}", CELL) for label, value in data.summary]]
@@ -69,9 +82,7 @@ def build_pdf(report, data, notes, author):
             story.append(_section_table(section, width))
         else:
             story.append(Paragraph("Nenhum registro neste relatório.", BODY))
-    filled = [(label, notes.get(key, "").strip()) for key, label in NOTE_LABELS if notes.get(key, "").strip()]
-    for label, text in filled:
-        story.append(KeepTogether([Paragraph(label, H2), Paragraph(_text(text), BODY)]))
+    story += _note_story(_note_blocks(notes, NOTES_AFTER))
     story += [Spacer(1, 10), Paragraph(f"Elaborado por: {_text(author)}", CELL)]
     return _build(story)
 
@@ -90,6 +101,10 @@ def csv_download(report, data, notes, key):
     writer.writerow([report.title])
     if data.subtitle:
         writer.writerow([data.subtitle])
+    for label, text in _note_blocks(notes, NOTES_BEFORE):
+        writer.writerow([])
+        writer.writerow([label])
+        writer.writerow([text])
     for label, value in data.summary:
         writer.writerow([label, value])
     for section in data.sections:
@@ -97,10 +112,8 @@ def csv_download(report, data, notes, key):
         writer.writerow([section.title])
         writer.writerow(section.header)
         writer.writerows(section.rows)
-    for notes_key, label in NOTE_LABELS:
-        text = notes.get(notes_key, "").strip()
-        if text:
-            writer.writerow([])
-            writer.writerow([label])
-            writer.writerow([text])
+    for label, text in _note_blocks(notes, NOTES_AFTER):
+        writer.writerow([])
+        writer.writerow([label])
+        writer.writerow([text])
     return response

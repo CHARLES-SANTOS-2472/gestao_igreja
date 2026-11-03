@@ -484,7 +484,8 @@ input:focus, select:focus, textarea:focus { outline: 3px solid #dce3eb; border-c
 .tile-wide { flex-direction: row; justify-content: flex-start; gap: 14px; text-align: left; min-height: 72px; }
 .tile-wide svg { flex: none; }
 .tile-wide small { display: block; margin-top: 2px; color: #6b7785; font-weight: 400; font-size: .8rem; }
-.notes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 14px 0 6px; }
+.notes-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin: 14px 0 6px; }
+.notes-grid .muted { display: block; margin-top: 4px; font-size: .85rem; }
 .notes-grid textarea { width: 100%; min-height: 90px; }
 .report-section-title { margin: 20px 0 8px; color: var(--red); font-size: 1.02rem; }
 .report-note { padding: 12px 14px; border-left: 3px solid var(--red); border-radius: 6px; background: var(--red-soft); }
