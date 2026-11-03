@@ -16,6 +16,7 @@ urlpatterns = [
         include("assistencia_social.urls"),
     ),
     path("usuarios/", include("contas.urls")),
+    path("relatorios/", include("relatorios.urls")),
     path("historico/", include("auditoria.urls")),
     path(
         "entrar/",

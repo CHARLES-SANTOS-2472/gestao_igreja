@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · Relatórios{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow"><a class="back-link" href="{% url 'report-hub' %}">RELATÓRIOS</a> / {{ report.module|upper }}</div><h1>{{ title }}</h1><p class="muted">Confira a pré-visualização abaixo. Só baixe quando estiver como você quer.</p></div>
+</div>
+<form method="post" class="report-form">
+  {% csrf_token %}
+  <section class="panel">
+    {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="filters">
+      {% if has_period %}
+      <div><label for="{{ form.date_from.id_for_label }}">Data inicial</label>{{ form.date_from }}{% for error in form.date_from.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>
+      <div><label for="{{ form.date_to.id_for_label }}">Data final</label>{{ form.date_to }}{% for error in form.date_to.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>
+      {% endif %}
+      <button class="button button-secondary" type="submit" name="acao" value="preview">Atualizar pré-visualização</button>
+    </div>
+    <div class="notes-grid">
+      <div><label for="{{ form.considerations.id_for_label }}">Considerações</label>{{ form.considerations }}</div>
+      <div><label for="{{ form.observations.id_for_label }}">Observações</label>{{ form.observations }}</div>
+      <div><label for="{{ form.needs.id_for_label }}">Necessidades e sugestões</label>{{ form.needs }}</div>
+    </div>
+    <p class="muted">Esses textos aparecem no final do relatório e não ficam salvos no sistema.</p>
+  </section>
+
+  <section class="panel upcoming-panel report-preview">
+    <div class="panel-heading"><div><h2>Pré-visualização</h2>{% if data.subtitle %}<p class="muted">{{ data.subtitle }}</p>{% endif %}</div></div>
+    {% if data.summary %}<div class="stats-grid">{% for label, value in data.summary %}<article class="stat-card"><span class="stat-label">{{ label }}</span><strong>{{ value }}</strong></article>{% endfor %}</div>{% endif %}
+    {% for section in data.sections %}
+    <h3 class="report-section-title">{{ section.title }}</h3>
+    {% if section.rows %}<div class="table-wrap"><table><thead><tr>{% for h in section.header %}<th>{{ h }}</th>{% endfor %}</tr></thead><tbody>
+      {% for row in section.rows %}<tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>{% endfor %}
+    </tbody></table></div>{% else %}<div class="empty-compact">Nenhum registro neste relatório.</div>{% endif %}
+    {% endfor %}
+    {% if form.considerations.value %}<h3 class="report-section-title">Considerações</h3><p class="report-note">{{ form.considerations.value|linebreaksbr }}</p>{% endif %}
+    {% if form.observations.value %}<h3 class="report-section-title">Observações</h3><p class="report-note">{{ form.observations.value|linebreaksbr }}</p>{% endif %}
+    {% if form.needs.value %}<h3 class="report-section-title">Necessidades e sugestões</h3><p class="report-note">{{ form.needs.value|linebreaksbr }}</p>{% endif %}
+  </section>
+
+  <div class="form-actions">
+    <button class="button button-secondary" type="submit" name="acao" value="csv">Baixar planilha</button>
+    <button class="button button-primary" type="submit" name="acao" value="pdf">Baixar PDF</button>
+  </div>
+</form>
+{% endblock %}

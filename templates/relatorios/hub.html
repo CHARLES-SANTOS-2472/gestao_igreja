@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Relatórios · Gestão da Igreja{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow">DOCUMENTOS</div><h1>Relatórios</h1><p class="muted">Veja a pré-visualização, acrescente suas considerações e baixe em PDF ou planilha. Cada área só mostra o que você tem permissão para ver.</p></div>
+</div>
+{% for module, items in modules %}
+<section class="panel upcoming-panel">
+  <div class="panel-heading"><div><h2>{{ module }}</h2></div></div>
+  <div class="report-grid">
+    {% for item in items %}<a class="tile tile-wide" href="{{ item.url }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6zM14 2v6h6M9 13h8M9 17h8"/></svg><span>{{ item.title }}<small>{{ item.description }}</small></span></a>{% endfor %}
+  </div>
+</section>
+{% empty %}
+<section class="panel"><div class="empty-compact">Você não tem permissão para nenhum relatório.</div></section>
+{% endfor %}
+{% endblock %}

@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1e2934">
   <title>{% block title %}Gestão da Igreja{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261103-8">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261103-9">
 </head>
 <body>
   <header class="topbar">
@@ -61,6 +61,7 @@
     {% if perms.membros.view_messageoccasion %}
     <a href="{% url 'occasion-list' %}">Ocasiões</a>
     {% endif %}
+    <a href="{% url 'report-hub' %}">Relatórios</a>
     {% if can_manage_users %}
     <a href="{% url 'user-list' %}">Usuários</a>
     <a href="{% url 'changelog-list' %}">Histórico</a>

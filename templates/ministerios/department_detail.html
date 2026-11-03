@@ -3,7 +3,7 @@
 {% block content %}
 <div class="page-heading">
   <div class="heading-with-photo">{% if department.photo %}<img class="avatar avatar-lg avatar-square" src="{{ department.photo.url }}" alt="Imagem de {{ department.name }}">{% endif %}<div><div class="eyebrow"><a class="back-link" href="{% url 'department-list' %}">MINISTÉRIOS</a> / DEPARTAMENTO</div><h1>{{ department.name }}</h1><p class="muted">{% if department.active %}Ativo{% else %}Inativo{% endif %}</p></div></div>
-  {% if perms.ministerios.change_department %}<a class="button button-primary" href="{% url 'department-update' department.pk %}">Editar departamento</a>{% endif %}
+  <div class="page-actions">{% if perms.ministerios.view_department %}<a class="button button-secondary" href="{% url 'report-scoped' 'ministerio' department.pk %}">Relatório do ministério</a>{% endif %}{% if perms.ministerios.change_department %}<a class="button button-primary" href="{% url 'department-update' department.pk %}">Editar departamento</a>{% endif %}</div>
 </div>
 <section class="panel">
   <div class="panel-heading"><div><h2>Informações</h2><p class="muted">Responsabilidade e descrição da equipe.</p></div></div>

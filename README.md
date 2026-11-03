@@ -112,3 +112,7 @@ As imagens ficam em `media/` (fora do Git). Para levá-las ao Codespace, `python
 ## PDFs e planilha do financeiro
 
 Os documentos usam o cabeçalho da igreja (logo, nome, CNPJ e endereço, definidos em `CHURCH_NAME`, `CHURCH_CNPJ` e `CHURCH_ADDRESS`). Em **Financeiro > Relatórios**, escolha o período e use "Baixar PDF" (prestação de contas com campos de assinatura) ou "Baixar planilha" (CSV que abre no Excel). Em cada doação recebida, "Emitir recibo (PDF)" gera o recibo; doações canceladas não geram recibo.
+
+## Relatórios (menu Relatórios)
+
+Cada módulo tem seu relatório (membros, visitantes, aniversariantes, eventos, reservas, ministérios, financeiro, doações, bens, contratos, fornecedores, tarefas e assistência social), e cada ministério tem o seu, pelo botão "Relatório do ministério". Escolha o período, **pré-visualize na tela** e só então baixe em PDF ou planilha. Os campos "Considerações", "Observações" e "Necessidades/sugestões" entram no documento, mas não são gravados no sistema. Cada relatório respeita as permissões do usuário. Para incluir um novo, adicione um construtor e um `ReportDef` em `relatorios/registry.py`.

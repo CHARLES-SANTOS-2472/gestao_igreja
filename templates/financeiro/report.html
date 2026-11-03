@@ -10,8 +10,7 @@
     <div><label for="{{ filter_form.date_to.id_for_label }}">Data final</label>{{ filter_form.date_to }}{% for error in filter_form.date_to.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>
     <button class="button button-secondary" type="submit">Aplicar período</button>
     <a class="text-link clear-filter" href="{% url 'financial-report' %}">Este mês</a>
-    <button class="button button-secondary" type="submit" name="formato" value="pdf">Baixar PDF</button>
-    <button class="button button-secondary" type="submit" name="formato" value="csv">Baixar planilha</button>
+    <a class="button button-secondary" href="{% url 'report' 'financeiro' %}">Pré-visualizar, anotar e baixar</a>
   </form>
   {% if filter_form.non_field_errors %}<div class="message error">{{ filter_form.non_field_errors }}</div>{% endif %}
   <p class="muted">Período aplicado: {{ date_from|date:"d/m/Y" }} a {{ date_to|date:"d/m/Y" }}. Somente lançamentos liquidados entram nos totais.</p>

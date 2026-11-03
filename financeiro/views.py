@@ -758,6 +758,83 @@ class DonationRecordCancelView(
         return redirect("donation-detail", pk=donation.pk)
 
 
+def financial_report_data(date_from, date_to):
+    settled = FinancialTransaction.objects.filter(
+        status=FinancialTransaction.Status.SETTLED,
+        settled_on__gte=date_from,
+        settled_on__lte=date_to,
+    )
+    totals = settled.aggregate(
+        income=Sum(
+            "amount", filter=Q(kind=FinancialTransaction.Kind.INCOME)
+        ),
+        expense=Sum(
+            "amount", filter=Q(kind=FinancialTransaction.Kind.EXPENSE)
+        ),
+    )
+    group_rows = settled.values(
+        "kind", "category__name"
+    ).annotate(total=Sum("amount"), count=Count("pk")).order_by(
+        "kind", "category__name"
+    )
+    payment_method_rows = settled.values("payment_method").annotate(
+        total=Sum("amount"), count=Count("pk")
+    ).order_by("payment_method")
+    payment_method_labels = dict(FinancialTransaction.PaymentMethod.choices)
+    for row in payment_method_rows:
+        row["method_label"] = payment_method_labels.get(
+            row["payment_method"], "Não informada"
+        )
+    currency_field = DecimalField(max_digits=12, decimal_places=2)
+    department_rows = settled.values("department__name").annotate(
+        income=Coalesce(
+            Sum("amount", filter=Q(kind=FinancialTransaction.Kind.INCOME)),
+            Value(Decimal("0.00")),
+            output_field=currency_field,
+        ),
+        expense=Coalesce(
+            Sum("amount", filter=Q(kind=FinancialTransaction.Kind.EXPENSE)),
+            Value(Decimal("0.00")),
+            output_field=currency_field,
+        ),
+    ).annotate(
+        net=ExpressionWrapper(
+            F("income") - F("expense"),
+            output_field=currency_field,
+        )
+    ).order_by("department__name")
+    event_rows = settled.values(
+        "event__title"
+    ).annotate(
+        income=Coalesce(
+            Sum("amount", filter=Q(kind=FinancialTransaction.Kind.INCOME)),
+            Value(Decimal("0.00")),
+            output_field=currency_field,
+        ),
+        expense=Coalesce(
+            Sum("amount", filter=Q(kind=FinancialTransaction.Kind.EXPENSE)),
+            Value(Decimal("0.00")),
+            output_field=currency_field,
+        ),
+    ).order_by("event__title")
+    return {
+        "income_total": totals["income"] or Decimal("0.00"),
+        "expense_total": totals["expense"] or Decimal("0.00"),
+        "net_total": (totals["income"] or Decimal("0.00"))
+        - (totals["expense"] or Decimal("0.00")),
+        "category_rows": group_rows,
+        "payment_method_rows": payment_method_rows,
+        "department_rows": department_rows,
+        "event_rows": event_rows,
+        "pending_transactions": FinancialTransaction.objects.filter(
+            status=FinancialTransaction.Status.PENDING,
+            due_on__gte=date_from,
+            due_on__lte=date_to,
+        ).select_related("category", "department", "event"),
+    }
+
+
+
 class FinancialReportView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
     template_name = "financeiro/report.html"
     permission_required = "financeiro.view_financialtransaction"
@@ -794,83 +871,9 @@ class FinancialReportView(LoginRequiredMixin, PermissionRequiredMixin, TemplateV
         if date_to is None:
             date_to = today
 
-        settled = FinancialTransaction.objects.filter(
-            status=FinancialTransaction.Status.SETTLED,
-            settled_on__gte=date_from,
-            settled_on__lte=date_to,
-        )
-        totals = settled.aggregate(
-            income=Sum(
-                "amount", filter=Q(kind=FinancialTransaction.Kind.INCOME)
-            ),
-            expense=Sum(
-                "amount", filter=Q(kind=FinancialTransaction.Kind.EXPENSE)
-            ),
-        )
-        group_rows = settled.values(
-            "kind", "category__name"
-        ).annotate(total=Sum("amount"), count=Count("pk")).order_by(
-            "kind", "category__name"
-        )
-        payment_method_rows = settled.values("payment_method").annotate(
-            total=Sum("amount"), count=Count("pk")
-        ).order_by("payment_method")
-        payment_method_labels = dict(FinancialTransaction.PaymentMethod.choices)
-        for row in payment_method_rows:
-            row["method_label"] = payment_method_labels.get(
-                row["payment_method"], "Não informada"
-            )
-        currency_field = DecimalField(max_digits=12, decimal_places=2)
-        department_rows = settled.values("department__name").annotate(
-            income=Coalesce(
-                Sum("amount", filter=Q(kind=FinancialTransaction.Kind.INCOME)),
-                Value(Decimal("0.00")),
-                output_field=currency_field,
-            ),
-            expense=Coalesce(
-                Sum("amount", filter=Q(kind=FinancialTransaction.Kind.EXPENSE)),
-                Value(Decimal("0.00")),
-                output_field=currency_field,
-            ),
-        ).annotate(
-            net=ExpressionWrapper(
-                F("income") - F("expense"),
-                output_field=currency_field,
-            )
-        ).order_by("department__name")
-        event_rows = settled.values(
-            "event__title"
-        ).annotate(
-            income=Coalesce(
-                Sum("amount", filter=Q(kind=FinancialTransaction.Kind.INCOME)),
-                Value(Decimal("0.00")),
-                output_field=currency_field,
-            ),
-            expense=Coalesce(
-                Sum("amount", filter=Q(kind=FinancialTransaction.Kind.EXPENSE)),
-                Value(Decimal("0.00")),
-                output_field=currency_field,
-            ),
-        ).order_by("event__title")
         context.update(
-            {
-                "filter_form": filter_form,
-                "date_from": date_from,
-                "date_to": date_to,
-                "income_total": totals["income"] or Decimal("0.00"),
-                "expense_total": totals["expense"] or Decimal("0.00"),
-                "net_total": (totals["income"] or Decimal("0.00"))
-                - (totals["expense"] or Decimal("0.00")),
-                "category_rows": group_rows,
-                "payment_method_rows": payment_method_rows,
-                "department_rows": department_rows,
-                "event_rows": event_rows,
-                "pending_transactions": FinancialTransaction.objects.filter(
-                    status=FinancialTransaction.Status.PENDING,
-                    due_on__gte=date_from,
-                    due_on__lte=date_to,
-                ).select_related("category", "department", "event"),
-            }
+            {"filter_form": filter_form, "date_from": date_from, "date_to": date_to,
+             **financial_report_data(date_from, date_to)}
         )
         return context
 
