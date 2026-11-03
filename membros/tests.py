@@ -742,7 +742,7 @@ class MemberManagementTests(TestCase):
             [chart["code"] for chart in response.context["charts"][:3]],
             ["ME", "AG", "DZ"],
         )
-        self.assertEqual(response.content.count(b'aria-expanded="true"'), 3)
+        self.assertEqual(response.content.count(b'aria-expanded="true"'), 1)
         self.assertEqual(response.content.count(b'class="chart-card chart-green is-collapsed"') +
                          response.content.count(b'class="chart-card chart-gold is-collapsed"'), 7)
         for label in ("Abrir agenda", "Abrir financeiro", "Abrir doações", "Abrir patrimônio", "Abrir assistência"):
