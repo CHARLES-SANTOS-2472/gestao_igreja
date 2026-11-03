@@ -82,6 +82,73 @@ class AssistanceRecordForm(forms.ModelForm):
         return cleaned_data
 
 
+class AssistanceRecordCreateForm(forms.ModelForm):
+    """Registra uma ou mais ajudas de uma vez: cria um registro para cada tipo marcado."""
+
+    aid_types = forms.MultipleChoiceField(
+        label="Tipos de ajuda",
+        choices=AssistanceRecord.AidType.choices,
+        widget=forms.CheckboxSelectMultiple,
+        error_messages={"required": "Marque ao menos um tipo de ajuda."},
+        help_text="Marque todos os tipos que a família recebe nesta data. Será criado um registro para cada um.",
+    )
+    amount = forms.DecimalField(
+        label="Valor da ajuda financeira",
+        required=False,
+        min_value=0.01,
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={"min": "0.01", "step": "0.01"}),
+        help_text="Preencha apenas se marcou ajuda financeira.",
+    )
+    field_order = ("aid_types", "description", "quantity", "amount", "assistance_date", "status")
+
+    class Meta:
+        model = AssistanceRecord
+        fields = ("description", "quantity", "assistance_date", "status")
+        widgets = {
+            "assistance_date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+            "quantity": forms.NumberInput(attrs={"min": "1", "step": "1"}),
+        }
+
+    def __init__(self, *args, family, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.family = family
+        self.fields["description"].help_text = (
+            "Informe somente os itens ou a finalidade operacional. "
+            "Não registre diagnósticos, relatos pastorais ou documentos pessoais."
+        )
+        self.fields["quantity"].help_text = "Quantidade de cada item não financeiro."
+
+    def clean(self):
+        cleaned_data = super().clean()
+        types = cleaned_data.get("aid_types") or []
+        amount = cleaned_data.get("amount")
+        financial = AssistanceRecord.AidType.FINANCIAL
+        if financial in types and amount is None:
+            self.add_error("amount", "Informe o valor da ajuda financeira.")
+        elif types and financial not in types and amount:
+            self.add_error("amount", "Informe valor somente para ajuda financeira.")
+        return cleaned_data
+
+    def save(self, commit=True):
+        base = super().save(commit=False)
+        records = []
+        for aid_type in self.cleaned_data["aid_types"]:
+            record = AssistanceRecord(
+                family=self.family,
+                aid_type=aid_type,
+                description=base.description,
+                quantity=base.quantity,
+                amount=self.cleaned_data["amount"] if aid_type == AssistanceRecord.AidType.FINANCIAL else None,
+                assistance_date=base.assistance_date,
+                status=base.status,
+            )
+            records.append(record)
+        self.records = records
+        return records
+
+
 class AssistanceRecordFilterForm(forms.Form):
     status = forms.ChoiceField(
         label="Situação",

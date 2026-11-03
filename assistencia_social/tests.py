@@ -201,7 +201,7 @@ class SocialAssistanceTests(TestCase):
         response = self.client.post(
             reverse("assistance-create", kwargs={"family_pk": self.family.pk}),
             {
-                "aid_type": AssistanceRecord.AidType.FOOD_BASKET,
+                "aid_types": [AssistanceRecord.AidType.FOOD_BASKET],
                 "description": "Cesta básica",
                 "quantity": "1",
                 "amount": "",
@@ -399,7 +399,7 @@ class SocialAssistanceTests(TestCase):
         response = self.client.post(
             url,
             {
-                "aid_type": AssistanceRecord.AidType.FINANCIAL,
+                "aid_types": [AssistanceRecord.AidType.FINANCIAL],
                 "description": "Ajuda emergencial",
                 "quantity": "1",
                 "amount": "",
@@ -415,7 +415,7 @@ class SocialAssistanceTests(TestCase):
         response = self.client.post(
             url,
             {
-                "aid_type": AssistanceRecord.AidType.FINANCIAL,
+                "aid_types": [AssistanceRecord.AidType.FINANCIAL],
                 "description": "Ajuda emergencial",
                 "quantity": "1",
                 "amount": "250.00",
@@ -432,7 +432,7 @@ class SocialAssistanceTests(TestCase):
         response = self.client.post(
             reverse("assistance-create", kwargs={"family_pk": self.family.pk}),
             {
-                "aid_type": AssistanceRecord.AidType.FOOD_BASKET,
+                "aid_types": [AssistanceRecord.AidType.FOOD_BASKET],
                 "description": "Cesta",
                 "quantity": "1",
                 "amount": "100.00",
@@ -444,6 +444,40 @@ class SocialAssistanceTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("amount", response.context["form"].errors)
         self.assertFalse(AssistanceRecord.objects.exists())
+
+    def test_one_submission_can_register_several_aid_types(self):
+        response = self.client.post(
+            reverse("assistance-create", kwargs={"family_pk": self.family.pk}),
+            {
+                "aid_types": [
+                    AssistanceRecord.AidType.FINANCIAL,
+                    AssistanceRecord.AidType.FOOD_BASKET,
+                    AssistanceRecord.AidType.CLOTHING,
+                ],
+                "description": "Ação de fim de ano",
+                "quantity": "2",
+                "amount": "150.00",
+                "assistance_date": timezone.localdate().isoformat(),
+                "status": AssistanceRecord.Status.DELIVERED,
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        records = {r.aid_type: r for r in AssistanceRecord.objects.filter(family=self.family)}
+        self.assertEqual(set(records), {"financial", "food_basket", "clothing"})
+        self.assertEqual(records["financial"].amount, Decimal("150.00"))
+        self.assertIsNone(records["food_basket"].amount)
+        self.assertEqual(records["clothing"].quantity, 2)
+        self.assertTrue(all(r.delivered_by == self.user for r in records.values()))
+
+    def test_at_least_one_aid_type_is_required(self):
+        response = self.client.post(
+            reverse("assistance-create", kwargs={"family_pk": self.family.pk}),
+            {"description": "x", "quantity": "1", "assistance_date": timezone.localdate().isoformat(),
+             "status": AssistanceRecord.Status.PLANNED},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("aid_types", response.context["form"].errors)
 
     def test_assistance_filter_rejects_invalid_or_reversed_dates_without_error(self):
         today = timezone.localdate()

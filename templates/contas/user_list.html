@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Usuários · Gestão da Igreja{% endblock %}
 {% block content %}
-<div class="page-heading"><div><div class="eyebrow">ADMINISTRAÇÃO</div><h1>Usuários</h1><p class="muted">Cadastre quem pode acessar o sistema e defina o que cada pessoa pode ver ou alterar.</p></div><a class="button button-primary" href="{% url 'user-create' %}">+ Novo usuário</a></div>
+<div class="page-heading"><div><div class="eyebrow">ADMINISTRAÇÃO</div><h1>Usuários</h1><p class="muted">Cadastre quem pode acessar o sistema e defina o que cada pessoa pode ver ou alterar.</p></div><div class="page-actions"><a class="button button-secondary" href="{% url 'changelog-list' %}">Histórico de alterações</a><a class="button button-primary" href="{% url 'user-create' %}">+ Novo usuário</a></div></div>
 <section class="panel">
   <div class="table-wrap"><table><thead><tr><th>Usuário</th><th>Perfil</th><th>Situação</th><th></th></tr></thead><tbody>
   {% for row in rows %}<tr>

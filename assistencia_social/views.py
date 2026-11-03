@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import Count, DecimalField, Q, Sum, Value
 from django.db.models.functions import Coalesce
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -30,6 +30,7 @@ from reportlab.platypus import (
 )
 
 from .forms import (
+    AssistanceRecordCreateForm,
     AssistanceRecordFilterForm,
     AssistanceRecordForm,
     AssistedFamilyForm,
@@ -553,7 +554,7 @@ class AssistanceRecordCreateView(
     LoginRequiredMixin, PermissionRequiredMixin, CreateView
 ):
     model = AssistanceRecord
-    form_class = AssistanceRecordForm
+    form_class = AssistanceRecordCreateForm
     template_name = "assistencia_social/assistance_form.html"
     permission_required = (
         "assistencia_social.add_assistancerecord",
@@ -574,12 +575,18 @@ class AssistanceRecordCreateView(
         return kwargs
 
     def form_valid(self, form):
-        form.instance.family = self.get_family()
-        form.instance.recorded_by = self.request.user
-        if form.instance.status == AssistanceRecord.Status.DELIVERED:
-            form.instance.delivered_by = self.request.user
-        messages.success(self.request, "Registro de ajuda salvo.")
-        return super().form_valid(form)
+        records = form.save()
+        for record in records:
+            record.recorded_by = self.request.user
+            if record.status == AssistanceRecord.Status.DELIVERED:
+                record.delivered_by = self.request.user
+            record.save()
+        count = len(records)
+        messages.success(
+            self.request,
+            "Registro de ajuda salvo." if count == 1 else f"{count} registros de ajuda salvos.",
+        )
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse(
