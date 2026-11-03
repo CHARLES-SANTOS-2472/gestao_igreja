@@ -1,0 +1,31 @@
+<div class="field field-wide photo-field" data-photo-field>
+  <label for="{{ form.photo.id_for_label }}">{{ form.photo.label }}</label>
+  <div class="photo-field-row">
+    <div class="photo-preview{% if not current %} is-empty{% endif %}" data-photo-preview>
+      {% if current %}<img src="{{ current.url }}" alt="Foto atual">{% else %}<span aria-hidden="true">{{ placeholder|default:"Foto" }}</span>{% endif %}
+    </div>
+    <div class="photo-controls">
+      {{ form.photo }}
+      <span class="help-text">{{ form.photo.help_text }} Formatos JPG, PNG ou WebP, até 10 MB.</span>
+      {% if current %}<label class="check-field">{{ form.remove_photo }}<span>{{ form.remove_photo.label }}</span></label>{% endif %}
+      {% for error in form.photo.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var box = document.querySelector("[data-photo-field]");
+  var input = box.querySelector("input[type=file]");
+  var preview = box.querySelector("[data-photo-preview]");
+  input.addEventListener("change", function () {
+    var file = input.files && input.files[0];
+    if (!file || file.type.indexOf("image/") !== 0) { return; }
+    var img = document.createElement("img");
+    img.alt = "Prévia da foto";
+    img.src = URL.createObjectURL(file);
+    preview.innerHTML = "";
+    preview.appendChild(img);
+    preview.classList.remove("is-empty");
+  });
+})();
+</script>

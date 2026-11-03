@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from .models import CboOccupation, Member
+from .photos import PhotoFormMixin
 
 
 class FamilyMemberMultipleChoiceField(forms.ModelMultipleChoiceField):
@@ -15,7 +16,7 @@ class FamilyMemberMultipleChoiceField(forms.ModelMultipleChoiceField):
         return super().clean(value)
 
 
-class MemberForm(forms.ModelForm):
+class MemberForm(PhotoFormMixin, forms.ModelForm):
     occupation_search = forms.CharField(
         label="Profissão pela Classificação Brasileira de Ocupações (CBO)",
         required=False,
@@ -68,6 +69,7 @@ class MemberForm(forms.ModelForm):
         fields = (
             "first_name",
             "last_name",
+            "photo",
             "cpf",
             "rg",
             "birth_date",

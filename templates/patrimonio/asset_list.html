@@ -15,7 +15,7 @@
   {% if assets %}
   <div class="table-wrap"><table><thead><tr><th>Bem</th><th>Categoria</th><th>Localização</th><th>Situação</th><th></th></tr></thead><tbody>
     {% for asset in assets %}<tr>
-      <td><a class="person-link" href="{% url 'asset-detail' asset.pk %}">{{ asset.name }}</a>{% if asset.asset_tag %}<span class="subline">Patrimônio: {{ asset.asset_tag }}</span>{% endif %}</td>
+      <td><a class="person-link person-with-photo" href="{% url 'asset-detail' asset.pk %}">{% if asset.photo %}<img class="avatar avatar-sm avatar-square" src="{{ asset.photo.url }}" alt="" loading="lazy">{% endif %}<span>{{ asset.name }}</span></a>{% if asset.asset_tag %}<span class="subline">Patrimônio: {{ asset.asset_tag }}</span>{% endif %}</td>
       <td>{{ asset.get_category_display }}</td><td>{{ asset.location|default:"—" }}</td>
       <td><span class="status-pill {% if asset.status == 'disposed' %}status-draft{% endif %}">{{ asset.get_status_display }}</span></td>
       <td><a class="text-link" href="{% url 'asset-detail' asset.pk %}">Abrir</a></td>

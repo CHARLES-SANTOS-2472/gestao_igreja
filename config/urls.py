@@ -2,8 +2,11 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
+from membros.photos import protected_media
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("arquivos/<path:path>", protected_media, name="protected-media"),
     path("agenda/", include("eventos.urls")),
     path("ministerios/", include("ministerios.urls")),
     path("financeiro/", include("financeiro.urls")),

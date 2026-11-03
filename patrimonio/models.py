@@ -4,8 +4,10 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
 
+from membros.photos import PhotoModelMixin, asset_photo_path
 
-class ChurchAsset(models.Model):
+
+class ChurchAsset(PhotoModelMixin, models.Model):
     class Category(models.TextChoices):
         INSTRUMENT = "instrument", "Instrumento musical"
         FURNITURE = "furniture", "Móvel"
@@ -40,6 +42,7 @@ class ChurchAsset(models.Model):
         validators=[MinValueValidator(0)],
     )
     description = models.TextField("observações", blank=True)
+    photo = models.ImageField("foto do bem", upload_to=asset_photo_path, blank=True)
     created_at = models.DateTimeField("cadastrado em", auto_now_add=True)
     updated_at = models.DateTimeField("atualizado em", auto_now=True)
 

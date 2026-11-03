@@ -2,7 +2,7 @@
 {% block title %}{{ asset.name }} · Patrimônio{% endblock %}
 {% block content %}
 <div class="page-heading">
-  <div><div class="eyebrow"><a class="back-link" href="{% url 'asset-list' %}">PATRIMÔNIO</a> / BENS</div><h1>{{ asset.name }}</h1><p class="muted">{{ asset.get_category_display }} · {{ asset.get_status_display }}</p></div>
+  <div class="heading-with-photo">{% if asset.photo %}<img class="avatar avatar-lg avatar-square" src="{{ asset.photo.url }}" alt="Foto de {{ asset.name }}">{% endif %}<div><div class="eyebrow"><a class="back-link" href="{% url 'asset-list' %}">PATRIMÔNIO</a> / BENS</div><h1>{{ asset.name }}</h1><p class="muted">{{ asset.get_category_display }} · {{ asset.get_status_display }}</p></div></div>
   {% if can_change %}<a class="button button-primary" href="{% url 'asset-update' asset.pk %}">Editar bem</a>{% endif %}
 </div>
 <section class="panel">

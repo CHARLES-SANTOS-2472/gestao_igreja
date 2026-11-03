@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models import F, Q
 from django.utils import timezone
 
+from .photos import PhotoModelMixin, member_photo_path
 
 class CboOccupation(models.Model):
     code = models.CharField("código CBO", max_length=6, primary_key=True)
@@ -60,7 +61,7 @@ class MessageOccasion(models.Model):
         return f"{self.name} ({self.day:02d}/{self.month:02d})"
 
 
-class Member(models.Model):
+class Member(PhotoModelMixin, models.Model):
     class Status(models.TextChoices):
         MEMBER = "member", "Membro"
         CONGREGANT = "congregant", "Congregado"
@@ -73,6 +74,7 @@ class Member(models.Model):
     first_name = models.CharField("nome", max_length=100)
     last_name = models.CharField("sobrenome", max_length=150, blank=True)
     is_placeholder = models.BooleanField("cadastro familiar incompleto", default=False)
+    photo = models.ImageField("foto", upload_to=member_photo_path, blank=True)
     is_deceased = models.BooleanField("falecido(a) (in memoriam)", default=False)
     deceased_on = models.DateField("data de falecimento", null=True, blank=True)
     cpf = models.CharField("CPF", max_length=14, blank=True)

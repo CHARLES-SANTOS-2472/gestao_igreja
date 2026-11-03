@@ -1,6 +1,8 @@
 from django import forms
 import re
 
+from membros.photos import PhotoFormMixin
+
 from .models import (
     AdministrativeTask,
     AssetMaintenance,
@@ -10,12 +12,13 @@ from .models import (
 )
 
 
-class ChurchAssetForm(forms.ModelForm):
+class ChurchAssetForm(PhotoFormMixin, forms.ModelForm):
     class Meta:
         model = ChurchAsset
         fields = (
             "name",
             "category",
+            "photo",
             "asset_tag",
             "serial_number",
             "location",

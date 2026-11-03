@@ -5,11 +5,12 @@
 <div class="page-heading">
   <div><div class="eyebrow"><a class="back-link" href="{{ person_list_url }}">{{ form_section_label }}</a> / CADASTRO</div><h1>{% if object %}Editar cadastro{% else %}{{ form_page_title|default:"Novo cadastro" }}{% endif %}</h1><p class="muted">Dados pessoais e familiares são acessíveis somente a usuários autorizados.</p></div>
 </div>
-<form method="post" class="panel form-panel">
+<form method="post" class="panel form-panel" enctype="multipart/form-data">
   {% csrf_token %}
   {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
   <section class="form-section"><h2>Dados pessoais</h2>
     <div class="form-grid">
+      {% include "includes/photo_field.html" with current=object.photo placeholder="Foto" %}
       {% for field in form %}{% if field.name in "first_name last_name cpf rg birth_date deceased_on" %}<div class="field {% if field.name == 'first_name' or field.name == 'last_name' %}field-wide{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required">*</span>{% endif %}</label>{{ field }}{% if field.name == "birth_date" or field.name == "deceased_on" %}<span class="help-text">Use o formato dd/mm/aaaa.</span>{% endif %}{% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>{% endif %}{% endfor %}
       <div class="field field-wide"><label class="check-field deceased-checkbox" for="{{ form.is_deceased.id_for_label }}">{{ form.is_deceased }}<span>{{ form.is_deceased.label }}</span></label>{% for error in form.is_deceased.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>
       <div class="field field-wide occupation-field">
