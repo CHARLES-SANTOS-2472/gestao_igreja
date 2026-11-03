@@ -496,3 +496,6 @@ input:focus, select:focus, textarea:focus { outline: 3px solid #dce3eb; border-c
 .report-note { padding: 12px 14px; border-left: 3px solid var(--red); border-radius: 6px; background: var(--red-soft); }
 .report-preview { margin-top: 18px; }
 .page-actions { flex-wrap: wrap; justify-content: flex-end; }
+.main-nav { justify-content: safe center; gap: 4px; padding-top: 6px; padding-bottom: 6px; }
+.main-nav a { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 0 14px; border-radius: 8px; text-align: center; transition: background .15s, color .15s; }
+.main-nav a:hover { background: var(--red-soft); text-decoration: none; }
