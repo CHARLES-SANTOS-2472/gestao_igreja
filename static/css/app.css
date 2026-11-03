@@ -382,6 +382,36 @@ input:focus, select:focus, textarea:focus { outline: 3px solid #dce3eb; border-c
   .event-facts { gap: 8px 14px; }
 }
 
+/* Vermelho predominante (cor da logo) */
+:root { --red: #d7262e; --red-dark: #a81b22; --red-soft: #fdecec; }
+.topbar { background: linear-gradient(100deg, var(--red-dark), var(--red)); }
+.button-quiet { border-color: #ffffff80; }
+.user-menu a { color: #fff; }
+.main-nav { border-bottom: 3px solid var(--red); }
+.main-nav a:hover, .text-link:hover, .back-link:hover { color: var(--red); }
+.button-primary { background: var(--red); }
+.button-primary:hover { background: var(--red-dark); }
+.eyebrow { color: var(--red); }
+.page-heading { border-left-color: var(--red); }
+.overview-hero { background: linear-gradient(120deg, #fff 0%, var(--red-soft) 100%); }
+.overview-welcome h1 { color: var(--red-dark); }
+.chart-icon, .chart-gold .chart-icon { background: var(--red-soft); color: var(--red); }
+.chart-head h3 { color: var(--green); }
+.chart-total strong { color: var(--red); }
+.hbar-fill, .chart-gold .hbar-fill { background: linear-gradient(90deg, var(--red-dark), #ee5a61); }
+.hbar-value, .legend-list b { color: var(--red-dark); }
+.chart-button { background: var(--red-soft); color: var(--red-dark); }
+.chart-button:hover { background: var(--red); color: #fff; }
+.bar-green, .chart-legend i.bar-green { background: linear-gradient(180deg, #ee5a61, var(--red-dark)); }
+.bar-gold, .chart-legend i.bar-gold { background: linear-gradient(180deg, #5d7590, var(--green)); }
+.donut-number, .gauge-number { fill: var(--red-dark); }
+.chart-card:not(.is-collapsed) { border-top-color: var(--red); }
+.chart-card:not(.is-collapsed) .chart-button { background: var(--red); }
+.chart-card:not(.is-collapsed) .chart-button:hover { background: var(--red-dark); }
+.chart-card.is-collapsed:hover { border-top-color: var(--red); }
+.chart-chevron { border-color: var(--red); }
+.deceased-checkbox input, .check-field input, .attendance-check input { accent-color: var(--red); }
+
 /* Logo da igreja */
 .brand-mark { width: 46px; height: 46px; overflow: hidden; padding: 3px; background: #fff; }
 .brand-mark img { width: 100%; height: 100%; object-fit: contain; }

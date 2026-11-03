@@ -725,7 +725,7 @@ class MemberManagementTests(TestCase):
         self.assertContains(response, "Abrir cadastro de pessoas")
         self.assertContains(response, reverse("member-list"))
         self.assertContains(response, "Mensagem da igreja")
-        self.assertContains(response, "Imagem da igreja")
+        self.assertContains(response, "img/logo.jpg")
         self.assertNotContains(response, "Cadastros recentes")
         self.assertNotContains(response, "Pessoa Reservada")
 
@@ -743,8 +743,7 @@ class MemberManagementTests(TestCase):
             ["ME", "AG", "DZ"],
         )
         self.assertEqual(response.content.count(b'aria-expanded="true"'), 1)
-        self.assertEqual(response.content.count(b'class="chart-card chart-green is-collapsed"') +
-                         response.content.count(b'class="chart-card chart-gold is-collapsed"'), 7)
+        self.assertEqual(response.content.count(b' is-collapsed" data-chart-card'), 9)
         for label in ("Abrir agenda", "Abrir financeiro", "Abrir doações", "Abrir patrimônio", "Abrir assistência"):
             self.assertContains(response, label)
 

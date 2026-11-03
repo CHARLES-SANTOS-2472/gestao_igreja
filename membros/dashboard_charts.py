@@ -31,7 +31,7 @@ def _bars(rows):
     return rows
 
 
-PALETTE = ("#3e566e", "#d64950", "#6889aa", "#943136", "#a5b9cd", "#e79498")
+PALETTE = ("#d7262e", "#2b3544", "#ee6a70", "#a81b22", "#6889aa", "#f3b3b6")
 
 
 def _with_colors(rows):
