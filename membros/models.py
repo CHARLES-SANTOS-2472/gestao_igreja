@@ -69,6 +69,12 @@ class ChurchMessage(models.Model):
     )
     DEFAULT_REFERENCE = "Isaías 43: 18-19"
 
+    DEFAULT_INTRO = (
+        "Indicadores de todos os módulos em um só lugar. "
+        "Use os botões dos gráficos para entrar em cada área."
+    )
+
+    intro = models.CharField("texto de apresentação", max_length=300, blank=True, default=DEFAULT_INTRO)
     text = models.TextField("texto", max_length=1200, default=DEFAULT_TEXT)
     reference = models.CharField(
         "referência", max_length=80, blank=True, default=DEFAULT_REFERENCE,

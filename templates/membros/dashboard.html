@@ -6,7 +6,7 @@
   <div class="overview-welcome">
     <div class="eyebrow">PAINEL ADMINISTRATIVO</div>
     <h1>Que bom ter você por aqui{% if user.get_full_name %}, {{ user.get_full_name }}{% endif %}.</h1>
-    <p>Indicadores de todos os módulos em um só lugar. Use os botões dos gráficos para entrar em cada área.</p>
+    {% if church_message.intro %}<p>{{ church_message.intro }}</p>{% endif %}
     <div class="overview-message-slot">
       <span class="overview-message-mark" aria-hidden="true">“</span>
       <div><span class="overview-message-text">{{ church_message.text|linebreaksbr }}</span>{% if church_message.reference %}<em class="overview-message-ref">{{ church_message.reference }}</em>{% endif %}</div>

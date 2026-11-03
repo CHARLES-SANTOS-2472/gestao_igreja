@@ -9,7 +9,7 @@ from .photos import PhotoFormMixin
 class ChurchMessageForm(forms.ModelForm):
     class Meta:
         model = ChurchMessage
-        fields = ("text", "reference")
+        fields = ("intro", "text", "reference")
         widgets = {"text": forms.Textarea(attrs={"rows": 6, "maxlength": 1200})}
 
 
