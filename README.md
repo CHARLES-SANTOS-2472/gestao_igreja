@@ -95,3 +95,7 @@ O app `comunicacao` envia boas-vindas após o cadastro, felicitações de aniver
 - IA: com `OPENAI_API_KEY` o texto é gerado pela OpenAI; sem ela, usa-se um modelo próprio. Os versículos vêm de uma lista fixa (a IA não escolhe versículos).
 - WhatsApp (Meta Cloud API): `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` e modelos aprovados (`WHATSAPP_TEMPLATE_WELCOME/BIRTHDAY/DAILY`, ou o campo da ocasião). O envio de imagem pelo WhatsApp ainda não está implementado; vai só o texto.
 - Assinatura: coloque a imagem em `static/img/assinatura.png` (fundo transparente) e ajuste `CHURCH_SIGNATURE`.
+
+## Dados de demonstração
+
+`python manage.py carregar_demo` cria ministérios, eventos, um fornecedor e três pessoas **fictícias** (todos com "(demonstração)" no nome), gera imagens nas cores da igreja e coloca uma imagem em cada ocasião padrão. Pode ser executado mais de uma vez sem duplicar. `python manage.py carregar_demo --limpar` remove apenas o que ele criou. As imagens ficam em `media/`, então o comando precisa rodar no próprio ambiente da apresentação (por exemplo, no Codespace).
