@@ -16,6 +16,7 @@ urlpatterns = [
         include("assistencia_social.urls"),
     ),
     path("usuarios/", include("contas.urls")),
+    path("historico/", include("auditoria.urls")),
     path(
         "entrar/",
         auth_views.LoginView.as_view(template_name="registration/login.html"),

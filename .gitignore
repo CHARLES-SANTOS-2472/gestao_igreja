@@ -6,4 +6,5 @@ dados_exportados.json
 staticfiles/
 .env
 media/
+backups/
 *.log

@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "membros",
     "comunicacao",
+    "auditoria",
     "eventos",
     "ministerios",
     "financeiro",
@@ -67,6 +68,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "axes.middleware.AxesMiddleware",
+    "auditoria.current.CurrentUserMiddleware",
 ]
 
 AUTHENTICATION_BACKENDS = [

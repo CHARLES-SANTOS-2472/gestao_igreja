@@ -103,3 +103,8 @@ O app `comunicacao` envia boas-vindas após o cadastro, felicitações de aniver
 ## Levar as imagens já carregadas para outro ambiente
 
 As imagens ficam em `media/` (fora do Git). Para levá-las ao Codespace, `python manage.py imagens_demo --exportar` copia as imagens do banco atual para `demo_media/` (versionada, com um `manifest.json`); depois de `git push`, no outro ambiente rode `git pull` e `python manage.py imagens_demo`. O comando recria o cadastro pelo nome (se ainda não existir) e anexa a imagem; pode ser repetido. Use `--forcar` para trocar imagens que já existam (por exemplo, as geradas por `carregar_demo`). Atenção: `demo_media/` inclui fotos de pessoas; mantenha o repositório privado.
+
+## Histórico de alterações e backup
+
+- **Histórico** (menu "Histórico", só administradores): registra quem cadastrou, alterou ou excluiu cada registro, com data e hora. Guarda apenas os nomes dos campos alterados, nunca os valores (CPF, dados financeiros etc.).
+- **Backup**: `python manage.py backup` gera `backups/backup-AAAAMMDD-HHMMSS.zip` com os dados e as imagens (`--manter 14` mantém só as 14 mais recentes). Para restaurar: `python manage.py backup --restaurar backups/arquivo.zip`. A pasta `backups/` não vai ao Git; guarde as cópias em local seguro, pois contêm dados pessoais.
