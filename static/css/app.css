@@ -394,7 +394,7 @@ input:focus, select:focus, textarea:focus { outline: 3px solid #dce3eb; border-c
 .eyebrow { color: var(--red); }
 .page-heading { border-left-color: var(--red); }
 .overview-hero { background: linear-gradient(120deg, #fff 0%, var(--red-soft) 100%); }
-.overview-welcome h1 { color: var(--red-dark); }
+.overview-welcome h1 { color: #2b3946; }
 .chart-icon, .chart-gold .chart-icon { background: var(--red-soft); color: var(--red); }
 .chart-head h3 { color: var(--green); }
 .chart-total strong { color: var(--red); }
