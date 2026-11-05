@@ -94,6 +94,8 @@ O app `comunicacao` envia boas-vindas após o cadastro, felicitações de aniver
 - Por padrão tudo é **simulação**: nada é enviado. Para enviar de verdade, defina `MESSAGING_LIVE=1`.
 - IA: com `OPENAI_API_KEY` o texto é gerado pela OpenAI; sem ela, usa-se um modelo próprio. Os versículos vêm de uma lista fixa (a IA não escolhe versículos).
 - WhatsApp (Meta Cloud API): `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` e modelos aprovados (`WHATSAPP_TEMPLATE_WELCOME/BIRTHDAY/DAILY`, ou o campo da ocasião). O envio de imagem pelo WhatsApp ainda não está implementado; vai só o texto.
+
+**Testar o WhatsApp com o seu número (sem mexer nos membros):** em [developers.facebook.com](https://developers.facebook.com) crie um app do tipo Business com o produto WhatsApp; em *API Setup* a Meta fornece um número de teste gratuito, o *Phone number ID* e um token temporário (24 h). Cadastre o seu celular como destinatário e confirme o código recebido. Coloque `WHATSAPP_TOKEN` e `WHATSAPP_PHONE_ID` no `.env` (ou nos segredos do Codespace; nunca no chat nem no Git) e rode `python manage.py testar_whatsapp --para 21999998888`. Isso envia o modelo `hello_world`. Para texto livre, escreva primeiro para o número de teste pelo WhatsApp e rode com `--livre "Paz do Senhor!"`.
 - Assinatura: coloque a imagem em `static/img/assinatura.png` (fundo transparente) e ajuste `CHURCH_SIGNATURE`.
 
 ## Dados de demonstração
