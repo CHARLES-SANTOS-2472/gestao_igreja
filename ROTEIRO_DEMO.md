@@ -13,14 +13,16 @@ Tempo sugerido: 15 a 20 minutos. Entre como administrador.
 3. **Agenda**: calendário, eventos com cartaz, escalas, inscrições e reservas.
 4. **Ministérios**: imagem de cada ministério, membros vinculados e reuniões.
 5. **Financeiro**: dízimo e oferta com QR-code Pix e "copia e cola", lançamentos, painel, **PDF de prestação de contas**, planilha e **recibo de doação**.
-6. **Assistência social**: famílias atendidas, cestas básicas e relatório em PDF (dados protegidos).
+6. **Assistência social**: famílias atendidas, registro de **vários tipos de ajuda** de uma vez (dinheiro, cesta básica, outros) e relatório em PDF (dados protegidos).
 7. **Patrimônio**: bens com foto, manutenção, fornecedores e tarefas.
 8. **Ocasiões**: datas especiais (Dia das Mães etc.) e como cadastrar uma nova.
 9. **Mensagens automáticas**: rodar `python manage.py enviar_mensagens --dry-run` e mostrar o que seria enviado (modo simulação).
-10. **Segurança**: usuários e permissões por função, bloqueio após tentativas de senha, **Histórico de alterações** e `python manage.py backup`.
+10. **Relatórios**: menu "Relatórios", pré-visualização antes de baixar, campos de introdução, desenvolvimento, conclusão e recomendações, **rascunho e finalização** (data e assinatura automáticas), PDF e CSV. Mostre também o relatório de um ministério.
+11. **Segurança**: usuários e permissões por função, bloqueio após tentativas de senha, **Histórico de alterações** (dentro de Usuários) e `python manage.py backup`.
 
 ## Pontos a explicar
 - Envio real de e-mail e WhatsApp só é ativado com `MESSAGING_LIVE=1` e as credenciais configuradas; na demonstração fica em simulação.
+- WhatsApp: a integração com a Meta Cloud API já foi testada (`python manage.py testar_whatsapp`) e a Meta aceitou a chamada. O envio real depende da verificação da empresa na Meta, etapa pendente; por isso a demonstração usa a simulação.
 - A assinatura dos pastores será acrescentada depois (`static/img/assinatura.png`).
 
 ## Depois da apresentação
