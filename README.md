@@ -46,7 +46,7 @@ Usuários são desativados, não excluídos. Cada pessoa troca a própria senha 
 2. No repositório: **Code > Codespaces > Create codespace on main**. O ambiente instala as dependências, migra o banco e inicia o servidor na porta 8000.
 3. No terminal do Codespace: `python manage.py createsuperuser`.
 4. Aba **Portas**: porta 8000, clique direito > **Visibilidade da porta** > Pública (apresentação) ou Privada (só você).
-5. Se o servidor parar: `python manage.py runserver 0.0.0.0:8000 --noreload --insecure`.
+5. Se o servidor parar: `bash .devcontainer/start.sh` (reinicia, migra o banco e, se o segredo `DJANGO_SECRET_KEY` não existir, usa uma chave temporária). Sem essa chave, com `DJANGO_DEBUG=0` o Django se recusa a iniciar.
 
 O Codespace hiberna quando fica parado. O banco do Codespace é independente do seu computador e começa vazio: use dados fictícios.
 
