@@ -30,6 +30,11 @@ class Command(BaseCommand):
         phone_id = getattr(settings, "WHATSAPP_PHONE_ID", "")
         if not (token and phone_id):
             raise CommandError("Defina WHATSAPP_TOKEN e WHATSAPP_PHONE_ID no .env (ou nos segredos do Codespace).")
+        if not phone_id.isdigit() or len(phone_id) < 12:
+            raise CommandError(
+                "WHATSAPP_PHONE_ID inválido. Use o 'Phone number ID' (só dígitos, ~15), "
+                "não o número de telefone de teste."
+            )
         phone = normalize_phone(options["para"])
         if not phone:
             raise CommandError("Celular inválido. Use DDD + número, ex.: 21999998888.")
