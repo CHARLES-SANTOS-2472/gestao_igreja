@@ -109,8 +109,8 @@ class ChurchMessage(models.Model):
     DEFAULT_REFERENCE = "Isaías 43: 18-19"
 
     DEFAULT_INTRO = (
-        "Indicadores de todos os módulos em um só lugar. "
-        "Use os botões dos gráficos para entrar em cada área."
+        "Servimos porque fomos salvos, transformados e alcançados por uma graça imerecida. "
+        "O amor a Deus é o combustível do nosso serviço."
     )
 
     intro = models.CharField("texto de apresentação", max_length=300, blank=True, default=DEFAULT_INTRO)
